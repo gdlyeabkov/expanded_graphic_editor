@@ -8,6 +8,7 @@ import 'dart:io';
 // import 'package:ext_storage/ext_storage.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SofttrackCanvas extends CustomPainter {
 
@@ -20,17 +21,19 @@ class SofttrackCanvas extends CustomPainter {
     'x': 1.0,
     'y': 1.0
   };
+  Color canvasBackgroundColor = Colors.white;
 
-  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale) {
+  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor) {
     this.context = context;
     this.touchX = touchX;
     this.touchY = touchY;
     this.shapes = shapes;
     this.canvasRotation = canvasRotation;
     this.canvasScale = canvasScale;
+    this.canvasBackgroundColor = canvasBackgroundColor;
   }
 
-  getCapture() async {
+  getCapture(String format) async {
     var recorder = await new ui.PictureRecorder();
     var origin = new Offset(0.0, 0.0);
     var paintBounds = new Rect.fromPoints(origin, Offset(415, 550));
@@ -40,7 +43,7 @@ class SofttrackCanvas extends CustomPainter {
     ui.Image image = await picture.toImage(415, 550);
     ByteData data = await image.toByteData(format: ui.ImageByteFormat.png) as ByteData;
     Uint8List decodedImage = data.buffer.asUint8List();
-    String fileName = 'expanded_graphic_editor_render.png';
+    String fileName = 'expanded_graphic_editor_render.${format}';
     Directory? downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
     String downloadsDirectoryPath = downloadsDirectory!.path;
     String path = '${downloadsDirectoryPath}/${fileName}';
@@ -66,6 +69,9 @@ class SofttrackCanvas extends CustomPainter {
     double canvasScaleX = canvasScale['x'] as double;
     double canvasScaleY = canvasScale['y'] as double;
     canvas.scale(canvasScaleX, canvasScaleY);
+
+    print('size.width: ${size.width}');
+    canvas.drawColor(canvasBackgroundColor, BlendMode.colorBurn);
     for (var shape in shapes) {
       String type = shape['type'];
       if (type == 'line') {

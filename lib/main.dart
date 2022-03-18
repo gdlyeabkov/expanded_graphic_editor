@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:graphiceditor/canvas_create.dart';
 import 'package:graphiceditor/softtrack_canvas.dart';
+import 'package:graphiceditor/start.dart';
 import 'package:touchable/touchable.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'models.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +23,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Softtrack графический редактор'),
+      home: StartPage(),
+      routes: {
+        '/welcome': (context) => StartPage(),
+        '/canvas/create': (context) => const CanvasCreatePage(),
+        '/main': (context) => const MyHomePage(
+          title: 'Softtrack Графический редактор'
+        ),
+      }
     );
   }
 }
@@ -96,8 +108,17 @@ class _MyHomePageState extends State<MyHomePage> {
     'x': 1.0,
     'y': 1.0
   };
+  double canvasWidth = 1007;
+  double canvasHeight = 1414;
+  int canvasDpi = 350;
+  String canvasPaperSize = 'A4';
+  Color canvasBackgroundColor = Colors.white;
   late SofttrackCanvas softtrackCanvas;
-  // SofttrackCanvas(context, touchX, touchY, shapes);
+  FileFormatType selectedFileFormat = FileFormatType.png;
+  Row prefooter = Row();
+  bool isPrefooterDraged = false;
+  double preffoterDragLeft = 0;
+  double preffoterDragTop = 0;
 
   onTouchStart(event, context) {
     setState(() {
@@ -499,13 +520,127 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   initState() {
     super.initState();
+    prefooter = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 10
+            ),
+            child: Icon(
+              Icons.undo
+            )
+          )
+        ),
+        GestureDetector(
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 10
+            ),
+            child: Icon(
+              Icons.redo
+            )
+          )
+        ),
+        GestureDetector(
+            child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                ),
+                child: Icon(
+                    Icons.drive_file_rename_outline
+                )
+            )
+        ),
+        GestureDetector(
+            child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                ),
+                child: Icon(
+                    Icons.brush
+                )
+            ),
+            onTap: () {
+              setState(() {
+                activeTool = 'pen';
+              });
+            }
+        ),
+        GestureDetector(
+            child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                ),
+                child: Icon(
+                    Icons.check_box_outline_blank
+                )
+            ),
+            onTap: () {
+              setState(() {
+                activeTool = 'eraser';
+              });
+            }
+        ),
+        GestureDetector(
+            child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                ),
+                child: Icon(
+                    Icons.check_box_outline_blank
+                )
+            )
+        ),
+        TextButton(
+            child: Text(
+                'Сохр.'
+            ),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(
+                  Color.fromARGB(255, 0, 100, 255)
+              ),
+              foregroundColor: MaterialStateProperty.all<Color>(
+                  Color.fromARGB(255, 255, 255, 255)
+              ),
+            ),
+            onPressed: () {
+              softtrackCanvas.getCapture('png');
+            }
+        ),
+        GestureDetector(
+            child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                ),
+                child: Icon(
+                    Icons.apps
+                )
+            )
+        ),
+      ]
+    );
   }
 
   @override
   Widget build(BuildContext context) {
 
     setState(() {
-      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale);
+      final arguments = ModalRoute.of(context)!.settings.arguments as Map;
+      if (arguments != null) {
+        print(arguments['width']);
+        print(arguments['height']);
+        print(arguments['dpi']);
+        print(arguments['paperSize']);
+        print(arguments['backgroundColor']);
+        canvasWidth = arguments['width'];
+        canvasHeight = arguments['height'];
+        canvasDpi = arguments['dpi'];
+        canvasPaperSize = arguments['paperSize'];
+        canvasBackgroundColor = arguments['backgroundColor'];
+      }
+      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor);
     });
 
     return Scaffold(
@@ -818,10 +953,14 @@ class _MyHomePageState extends State<MyHomePage> {
           GestureDetector(
             child: Container(
               child: CustomPaint(
+                size: Size(
+                  canvasWidth,
+                  canvasHeight
+                ),
                 painter: softtrackCanvas
               ),
-              width: 415,
-              height: 550
+              width: canvasWidth,
+              height: canvasHeight
             ),
             onHorizontalDragStart: (event) {
               onTouchStart(event, context);
@@ -842,106 +981,32 @@ class _MyHomePageState extends State<MyHomePage> {
               onTouchEnd(event, context);
             },
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.undo
-                  )
+          Draggable(
+            onDragEnd: (event) {
+              setState(() {
+                isPrefooterDraged = false;
+                preffoterDragLeft = event.offset.dx;
+                preffoterDragTop = event.offset.dy;
+                print('preffoterDragLeft: ${preffoterDragLeft}');
+                print('preffoterDragTop: ${preffoterDragTop}');
+              });
+            },
+            onDragStarted: () {
+              setState(() {
+                isPrefooterDraged = true;
+              });
+            },
+            feedback: prefooter,
+            child: (
+              isPrefooterDraged ?
+                Row()
+              :
+                Positioned(
+                  left: preffoterDragLeft,
+                  top: preffoterDragTop,
+                  child: prefooter
                 )
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.redo
-                  )
-                )
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                   horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.drive_file_rename_outline
-                  )
-                )
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.brush
-                  )
-                ),
-                onTap: () {
-                  setState(() {
-                    activeTool = 'pen';
-                  });
-                }
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.check_box_outline_blank
-                  )
-                ),
-                onTap: () {
-                  setState(() {
-                    activeTool = 'eraser';
-                  });
-                }
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.check_box_outline_blank
-                  )
-                )
-              ),
-              TextButton(
-                child: Text(
-                  'Сохр.'
-                ),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 100, 255)
-                  ),
-                  foregroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 255, 255, 255)
-                  ),
-                ),
-                onPressed: () {
-                  softtrackCanvas.getCapture();
-                }
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.apps
-                  )
-                )
-              ),
-            ]
+            )
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -963,6 +1028,111 @@ class _MyHomePageState extends State<MyHomePage> {
                     );}
                   ).toList();
                 },
+                onSelected: (item) async {
+                 if (false) {
+
+                 } else if (item == 'Экспорт PNG / JPG файлы') {
+                   showDialog(
+                     context: context,
+                     builder: (BuildContext context) => StatefulBuilder(
+                       builder: (BuildContext context, StateSetter setState) =>  AlertDialog(
+                         title: Text(
+                          'Формат файла'
+                         ),
+                         content: Container(
+                           height: 150,
+                           child: Column(
+                             children: [
+                               Row(
+                                 children: [
+                                  Radio<FileFormatType>(
+                                   value: FileFormatType.png,
+                                   groupValue: selectedFileFormat,
+                                   onChanged: (value) {
+                                     setState(() {
+                                       selectedFileFormat = value!;
+                                     });
+                                   }
+                                  ),
+                                  Text(
+                                    'PNG'
+                                  )
+                                ]
+                               ),
+                               Row(
+                                 children: [
+                                   Radio<FileFormatType>(
+                                     value: FileFormatType.pngTransparency,
+                                     groupValue: selectedFileFormat,
+                                     onChanged: (value) {
+                                       setState(() {
+                                         selectedFileFormat = value!;
+                                       });
+                                     }
+                                   ),
+                                   Text(
+                                     'PNG (прозрачный)'
+                                   )
+                                 ]
+                               ),
+                               Row(
+                                 children: [
+                                   Radio<FileFormatType>(
+                                     value: FileFormatType.jpg,
+                                     groupValue: selectedFileFormat,
+                                     onChanged: (value) {
+                                       setState(() {
+                                         selectedFileFormat = value!;
+                                       });
+                                     }
+                                   ),
+                                   Text(
+                                     'JPG'
+                                   )
+                                 ]
+                               ),
+                             ]
+                           )
+                         ),
+                         actions: [
+                           TextButton(
+                             child: Text(
+                               'Отмена'
+                             ),
+                             onPressed: () {
+                               return Navigator.pop(context, 'Cancel');
+                             }
+                           ),
+                           TextButton(
+                             child: Text(
+                               'ОК'
+                             ),
+                             onPressed: () {
+                               String format = 'png';
+                               if (selectedFileFormat == FileFormatType.png) {
+                                 format = 'png';
+                               } else if (selectedFileFormat == FileFormatType.pngTransparency) {
+                                 format = 'png';
+                               } else if (selectedFileFormat == FileFormatType.jpg) {
+                                 format = 'jpg';
+                               }
+                               softtrackCanvas.getCapture(format);
+                               return Navigator.pop(context, 'OK');
+                             }
+                           ),
+                         ]
+                       )
+                     )
+                   );
+                 } else if (item == 'Справка') {
+                   final String url = 'https://medibangpaint.com/ru/android/use/';
+                   await launch(url);
+                 } else if (item == 'Калибровка гидролокатора пера') {
+                   final String url = 'market://details?id=com.greenbulb.calibrate';
+                   if (await canLaunch(url))
+                    await launch(url);
+                 }
+                }
               ),
               PopupMenuButton(
                 child: Container(
