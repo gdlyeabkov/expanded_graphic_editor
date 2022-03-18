@@ -44,6 +44,60 @@ class _MyHomePageState extends State<MyHomePage> {
   Color paleteColor = Colors.black;
   String activeTool = 'pen';
   String textToolDialogContent = '';
+  double textToolDialogFontSize = 18;
+  double textToolDialogTextSpace = 0;
+  double textToolDialogLineHeight = 0;
+  String textToolDialogRotationContent = '';
+  double textToolDialogOutlineWidth = 0;
+  bool isTextToolDialogOutlineRound = true;
+  Color textToolDialogOutlineColor = Colors.black;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  var menuContextMenuItems = {
+    'Сохранить',
+    'Сохранить как',
+    'Экспорт PNG / JPG файлы',
+    'Настройки',
+    'Справка',
+    'Синхронизация',
+    'аннотирование',
+    'Start using the sonar pen.',
+    'Калибровка гидролокатора пера',
+    'Войти',
+    'Выход'
+  };
+  var editContextMenuItems = {
+    'Копия',
+    'Вырезать',
+    'Вставить',
+    'Повернуть холст влево',
+    'Повернуть холст',
+    'Повернуть холст по',
+    'Настройки холста',
+    'Обрезка'
+  };
+  var selectionContextMenuItems = {
+    'Сохранить все',
+    'Отменить выбор',
+    'Инвертировать',
+    'Выбрать область',
+    'Уменьшить/Увеличть',
+    'Свободная трансформация',
+    'Преобразование',
+    'Создать границу'
+  };
+  var toggleOrientationContextMenuItems = {
+    'Поворот влево',
+    'Поворот вправо',
+    'Отразить по горизонтали',
+    'Сброс'
+  };
+  double canvasRotation = 0.0;
+  var canvasScale = {
+    'x': 1.0,
+    'y': 1.0
+  };
+  late SofttrackCanvas softtrackCanvas;
+  // SofttrackCanvas(context, touchX, touchY, shapes);
 
   onTouchStart(event, context) {
     setState(() {
@@ -161,87 +215,281 @@ class _MyHomePageState extends State<MyHomePage> {
           'type': 'gradient'
         });
       } else if (activeTool == 'text') {
+        setState(() {
+          textToolDialogFontSize = 18;
+          textToolDialogTextSpace = 0;
+          textToolDialogLineHeight = 0;
+        });
         showDialog<String>(
           context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: const Text(''),
-            content: SingleChildScrollView(
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Текст'
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 200,
-                          child: TextField(
-                            onChanged: (value) {
-                              textToolDialogContent = value;
+          builder: (BuildContext context) => StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) => AlertDialog(
+              title: const Text(''),
+              content: SingleChildScrollView(
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Текст'
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 200,
+                            child: TextField(
+                              onChanged: (value) {
+                                textToolDialogContent = value;
+                              },
+                              minLines: null,
+                              maxLines: null
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Fluttertoast.showToast(
+                                msg: 'В настоящее время фукнция\nголосового набора\nне используется',
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                timeInSecForIosWeb: 1,
+                                backgroundColor: Colors.black,
+                                textColor: Colors.white,
+                                fontSize: 16.0
+                              );
+                            },
+                            child: Icon(
+                              Icons.mic
+                            )
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                            },
+                            child:  Icon(
+                              Icons.keyboard
+                            )
+                          ),
+                        ]
+                      ),
+                      Text(
+                        'Шрифт'
+                      ),
+                      Text(
+                        'Размер текста ${textToolDialogFontSize.round()} pt'
+                      ),
+                      Slider(
+                        value: textToolDialogFontSize,
+                        onChanged: (double value) {
+                          setState(() {
+                            textToolDialogFontSize = value;
+                          });
+                        },
+                        min: 0,
+                        max: 100
+                      ),
+                      Text(
+                        'Текстовое пространство ${textToolDialogTextSpace.round()}'
+                      ),
+                      Slider(
+                        value: textToolDialogTextSpace,
+                        onChanged: (double value) {
+                          setState(() {
+                            textToolDialogTextSpace = value;
+                          });
+                        },
+                        divisions: 100,
+                        min: 0,
+                        max: 100
+                      ),
+                      Text(
+                        'Межстрочный интервал ${textToolDialogLineHeight.round()}'
+                      ),
+                      Slider(
+                        value: textToolDialogLineHeight,
+                        onChanged: (double value) {
+                          setState(() {
+                            textToolDialogLineHeight = value;
+                          });
+                        },
+                        divisions: 100,
+                        min: 0,
+                        max: 100
+                      ),
+                      Text(
+                        'Градус поворота'
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            height: 35,
+                            width: 35,
+                            child: TextField(
+                              controller: TextEditingController(
+                                text: '0'
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  textToolDialogRotationContent = value;
+                                });
+                              },
+                            )
+                          ),
+                          GestureDetector(
+                            child: Icon(
+                              Icons.text_rotation_none
+                            ),
+                            onTap: () {
+
                             }
+                          ),
+                          GestureDetector(
+                            child: Icon(
+                              Icons.text_rotation_down
+                            ),
+                            onTap: () {
+
+                            }
+                          ),
+                          GestureDetector(
+                            child: Icon(
+                              Icons.text_rotation_none
+                            ),
+                            onTap: () {
+
+                            }
+                          ),
+                          GestureDetector(
+                            child: Icon(
+                              Icons.text_rotate_up
+                            ),
+                            onTap: () {
+
+                            }
+                          ),
+                        ]
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                'Цвет края'
+                              ),
+                              GestureDetector(
+                                child: Icon(
+                                  Icons.check_box_outline_blank
+                                ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) => AlertDialog(
+                                      content: ColorPicker(
+                                        pickerColor: textToolDialogOutlineColor,
+                                        onColorChanged: (Color color) {
+                                          setState(() {
+                                            textToolDialogOutlineColor = color;
+                                          });
+                                        },
+                                        pickerAreaBorderRadius: BorderRadius.circular(1000.0),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: Text(
+                                            'Отмена'
+                                          ),
+                                          onPressed: () {
+                                            return Navigator.pop(context, 'Cancel');
+                                          }
+                                        ),
+                                        TextButton(
+                                          child: Text(
+                                            'ОК'
+                                          ),
+                                          onPressed: () {
+                                            return Navigator.pop(context, 'OK');
+                                          }
+                                        ),
+                                      ]
+                                    )
+                                  );
+                                }
+                              )
+                            ]
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'Ширина края ${textToolDialogOutlineWidth.round()} px'
+                              ),
+                              Slider(
+                                onChanged: (double value) {
+                                  setState(() {
+                                    textToolDialogOutlineWidth = value;
+                                  });
+                                },
+                                value: textToolDialogOutlineWidth,
+                                min: 0,
+                                max: 100
+                              ),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: isTextToolDialogOutlineRound,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isTextToolDialogOutlineRound = !isTextToolDialogOutlineRound;
+                                      });
+                                    }
+                                  ),
+                                  Text(
+                                    'Круглые края'
+                                  )
+                                ]
+                              )
+                            ]
                           )
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Fluttertoast.showToast(
-                              msg: 'В настоящее время фукнция\nголосового набора\nне используется',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.black,
-                              textColor: Colors.white,
-                              fontSize: 16.0
-                            );
-                          },
-                          child: Icon(
-                            Icons.mic
-                          )
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                          },
-                          child:  Icon(
-                            Icons.keyboard
-                          )
-                        ),
-                      ]
-                    )
-                  ]
-                )
-              )
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    print('добавляю текст');
-                    shapes.add({
-                      'x': touchX,
-                      'y': touchY,
-                      'content': textToolDialogContent,
-                      'type': 'text'
-                    });
-                    textToolDialogContent = '';
-                  });
-                  return Navigator.pop(context, 'OK');
-                },
-                child: const Text(
-                  'Задать'
+                        ]
+                      )
+                    ]
+                  )
                 )
               ),
-              TextButton(
-                onPressed: () {
-                  return Navigator.pop(context, 'OK');
-                },
-                child: const Text(
-                  'Отмена'
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      print('добавляю текст');
+                      shapes.add({
+                        'x': touchX,
+                        'y': touchY,
+                        'content': textToolDialogContent,
+                        'fontSize': textToolDialogFontSize,
+                        'lineHeight': textToolDialogLineHeight,
+                        'color': paleteColor,
+                        'outlineColor': textToolDialogOutlineColor,
+                        'outlineWidth': textToolDialogOutlineWidth,
+                        'type': 'text'
+                      });
+                      textToolDialogContent = '';
+                    });
+                    return Navigator.pop(context, 'OK');
+                  },
+                  child: const Text(
+                    'Задать'
+                  )
+                ),
+                TextButton(
+                  onPressed: () {
+                    return Navigator.pop(context, 'OK');
+                  },
+                  child: const Text(
+                    'Отмена'
+                  )
                 )
-              )
-            ]
+              ]
+            )
           )
         );
       }
@@ -249,9 +497,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
+    setState(() {
+      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale);
+    });
+
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
       ),
@@ -560,10 +818,10 @@ class _MyHomePageState extends State<MyHomePage> {
           GestureDetector(
             child: Container(
               child: CustomPaint(
-                painter: SofttrackCanvas(context, touchX, touchY, shapes)
+                painter: softtrackCanvas
               ),
               width: 415,
-              height: 650
+              height: 550
             ),
             onHorizontalDragStart: (event) {
               onTouchStart(event, context);
@@ -585,13 +843,256 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.undo
+                  )
+                )
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.redo
+                  )
+                )
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                   horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.drive_file_rename_outline
+                  )
+                )
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.brush
+                  )
+                ),
+                onTap: () {
+                  setState(() {
+                    activeTool = 'pen';
+                  });
+                }
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.check_box_outline_blank
+                  )
+                ),
+                onTap: () {
+                  setState(() {
+                    activeTool = 'eraser';
+                  });
+                }
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.check_box_outline_blank
+                  )
+                )
+              ),
+              TextButton(
+                child: Text(
+                  'Сохр.'
+                ),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Color.fromARGB(255, 0, 100, 255)
+                  ),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                    Color.fromARGB(255, 255, 255, 255)
+                  ),
+                ),
+                onPressed: () {
+                  softtrackCanvas.getCapture();
+                }
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.apps
+                  )
+                )
+              ),
             ]
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              PopupMenuButton<String>(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.menu
+                  )
+                ),
+                itemBuilder: (BuildContext context) {
+                  return menuContextMenuItems.map((String menuContextMenuItem) {
+                    return  PopupMenuItem<String>(
+                      value: menuContextMenuItem,
+                      child: Text(menuContextMenuItem),
+                    );}
+                  ).toList();
+                },
+              ),
+              PopupMenuButton(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.edit
+                  )
+                ),
+                itemBuilder: (BuildContext context) {
+                  return editContextMenuItems.map((String editContextMenuItem) {
+                    return PopupMenuItem<String>(
+                      value: editContextMenuItem,
+                      child: Text(editContextMenuItem)
+                    );}
+                  ).toList();
+                },
+              ),
+              PopupMenuButton(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.select_all
+                  )
+                ),
+                itemBuilder: (BuildContext context) {
+                  return selectionContextMenuItems.map((String selectionContextMenuItem) {
+                    return PopupMenuItem<String>(
+                        value: selectionContextMenuItem,
+                        child: Text(selectionContextMenuItem)
+                    );}
+                  ).toList();
+                },
+              ),
+              PopupMenuButton(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.screen_rotation
+                  )
+                ),
+                itemBuilder: (BuildContext context) {
+                  return toggleOrientationContextMenuItems.map((String toggleOrientationContextMenuItem) {
+                    return PopupMenuItem<String>(
+                      value: toggleOrientationContextMenuItem,
+                      child: Text(toggleOrientationContextMenuItem)
+                    );}
+                  ).toList();
+                },
+                onSelected: (item) {
+                  if (item == 'Поворот влево') {
+                    setState(() {
+                      canvasRotation += 15.0;
+                    });
+                  } else if (item == 'Поворот вправо') {
+                    setState(() {
+                      canvasRotation -= 15.0;
+                    });
+                  } else if (item == 'Отразить по горизонтали') {
+                    setState(() {
+                      canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
+                    });
+                  } else if (item == 'Сброс') {
+                    setState(() {
+                      canvasRotation = 0.0;
+                      canvasScale = {
+                        'x': 1.0,
+                        'y': 1.0
+                      };
+                    });
+                  }
+                }
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.brush
+                  )
+                ),
+                onTap:() {
 
+                },
+              ),
+              GestureDetector(
+                child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.palette
+                    )
+                ),
+                onTap:() {
+                  scaffoldKey.currentState!.openDrawer();
+                },
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.layers
+                  )
+                ),
+                onTap:() {
+                  scaffoldKey.currentState!.openEndDrawer();
+                },
+              ),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 10
+                  ),
+                  child: Icon(
+                    Icons.circle_outlined
+                  )
+                ),
+                onTap:() {
+
+                },
+              ),
             ]
           )
         ]

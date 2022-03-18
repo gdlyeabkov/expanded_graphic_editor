@@ -1,9 +1,13 @@
 // import 'dart:html';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:touchable/touchable.dart';
+import 'dart:io';
+// import 'package:ext_storage/ext_storage.dart';
+import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SofttrackCanvas extends CustomPainter {
 
@@ -11,17 +15,57 @@ class SofttrackCanvas extends CustomPainter {
   double touchX = 0;
   double touchY = 0;
   List shapes = [];
+  double canvasRotation = 0.0;
+  var canvasScale = {
+    'x': 1.0,
+    'y': 1.0
+  };
 
-  SofttrackCanvas(context, touchX, touchY, shapes) {
+  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale) {
     this.context = context;
     this.touchX = touchX;
     this.touchY = touchY;
     this.shapes = shapes;
+    this.canvasRotation = canvasRotation;
+    this.canvasScale = canvasScale;
+  }
+
+  getCapture() async {
+    var recorder = await new ui.PictureRecorder();
+    var origin = new Offset(0.0, 0.0);
+    var paintBounds = new Rect.fromPoints(origin, Offset(415, 550));
+    var canvas = new Canvas(recorder, paintBounds);
+    paint(canvas, Size(415, 550));
+    var picture = recorder.endRecording();
+    ui.Image image = await picture.toImage(415, 550);
+    ByteData data = await image.toByteData(format: ui.ImageByteFormat.png) as ByteData;
+    Uint8List decodedImage = data.buffer.asUint8List();
+    String fileName = 'expanded_graphic_editor_render.png';
+    Directory? downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
+    String downloadsDirectoryPath = downloadsDirectory!.path;
+    String path = '${downloadsDirectoryPath}/${fileName}';
+    final file = File(path);
+    await file.writeAsBytes(decodedImage);
+    Fluttertoast.showToast(
+      msg: 'Сохранение выполнено',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 16.0
+    );
+    return decodedImage;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-
+    // var capture = await getCapture(size);
+    // print('capture: ${capture}');
+    canvas.rotate(canvasRotation);
+    double canvasScaleX = canvasScale['x'] as double;
+    double canvasScaleY = canvasScale['y'] as double;
+    canvas.scale(canvasScaleX, canvasScaleY);
     for (var shape in shapes) {
       String type = shape['type'];
       if (type == 'line') {
@@ -100,14 +144,132 @@ class SofttrackCanvas extends CustomPainter {
         double x = shape['x'];
         double y = shape['y'];
         String content = shape['content'];
+        double fontSize = shape['fontSize'];
+        double lineHeight = shape['lineHeight'];
+        Color color = shape['color'];
+        Color outlineColor = shape['outlineColor'];
+        double outlineWidth = shape['outlineWidth'];
         print('text: ${content}');
+        Paint foregroundPaint = Paint();
+        foregroundPaint.style = PaintingStyle.fill;
+        foregroundPaint.color = color;
+        List<Shadow> shadows = [];
+        if (outlineWidth >= 1) {
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+          shadows.add(
+              Shadow(
+                  color: outlineColor,
+                  offset: Offset(0, 0),
+                  blurRadius: 1.0
+              )
+          );
+          shadows.add(
+            Shadow(
+              color: outlineColor,
+              offset: Offset(0, 0),
+              blurRadius: 1.0
+            )
+          );
+        }
         TextPainter textPainter = TextPainter(
           textDirection: TextDirection.ltr,
           text: TextSpan(
             text: '$content',
             style: TextStyle(
-              color: Colors.black,
-              fontSize: 30,
+              color: color,
+              fontSize: fontSize,
+              height: lineHeight,
+              shadows: shadows
             )
           )
         );
