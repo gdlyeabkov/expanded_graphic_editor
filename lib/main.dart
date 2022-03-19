@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'gallery.dart';
 import 'models.dart';
 
 void main() {
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/main': (context) => const MyHomePage(
           title: 'Softtrack Графический редактор'
         ),
+        '/gallery': (context) => GalleryPage()
       }
     );
   }
@@ -119,11 +121,66 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isPrefooterDraged = false;
   double preffoterDragLeft = 0;
   double preffoterDragTop = 0;
+  int activeLayer = 0;
+  List<Widget> layers = [
+
+  ];
+
+  Future<List<Widget>> get getLayers async {
+    return layers;
+  }
+
+  addLayer(int layerIndexS) {
+      int layerIndex = layers.length;
+      // setState(() {
+      layers.add(
+        GestureDetector(
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.remove_red_eye
+                    ),
+                    Icon(
+                      Icons.rectangle
+                    ),
+                    Text(
+                      'Слой 1'
+                    )
+                  ]
+                ),
+                Icon(
+                  Icons.settings
+                )
+              ]
+            ),
+            decoration: BoxDecoration(
+              color: (
+                activeLayer == layerIndex ?
+                  Color.fromARGB(255, 200, 200, 200)
+                :
+                  Color.fromARGB(255, 255, 255, 255)
+              )
+            )
+          ),
+          onTap: () {
+            print('layerIndex: ${layerIndex}');
+            activeLayer = layerIndex;
+            print('activeLayer: ${activeLayer}');
+          }
+        )
+      );
+    // });
+  }
 
   onTouchStart(event, context) {
     setState(() {
-      touchX = event.globalPosition.dx;
-      touchY = event.globalPosition.dy;
+      touchX = event.localPosition.dx;
+      touchY = event.localPosition.dy;
       if (activeTool == 'curve') {
         if (curve == 'polygone') {
           shapes.add({
@@ -161,10 +218,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   onTouchMove(event, context) {
-    print('DragUpdateEvent ${event.globalPosition.dx} ${event.globalPosition.dy}');
     setState(() {
-      touchX = event.globalPosition.dx;
-      touchY = event.globalPosition.dy;
+      touchX = event.localPosition.dx;
+      touchY = event.localPosition.dy;
       if (activeTool == 'pen') {
         shapes.add({
           'x1': touchX,
@@ -621,6 +677,48 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ]
     );
+    int layerIndex = 0;
+    layers.add(
+      GestureDetector(
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.remove_red_eye
+                  ),
+                  Icon(
+                    Icons.rectangle
+                  ),
+                  Text(
+                    'Слой 1'
+                  )
+                ]
+              ),
+              Icon(
+                Icons.settings
+              )
+            ]
+          ),
+          decoration: BoxDecoration(
+            color: (
+              activeLayer == layerIndex ?
+                Color.fromARGB(255, 200, 200, 200)
+              :
+                Color.fromARGB(255, 255, 255, 255)
+            )
+          )
+        ),
+        onTap: () {
+          print('layerIndex: ${layerIndex}');
+          activeLayer = layerIndex;
+          print('activeLayer: ${activeLayer}');
+        },
+      )
+    );
   }
 
   @override
@@ -643,663 +741,803 @@ class _MyHomePageState extends State<MyHomePage> {
       softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor);
     });
 
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              margin: EdgeInsets.symmetric(
-                vertical: 15
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'pen';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.brush
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    )
-                  ),
-                  GestureDetector(
+    return WillPopScope(
+      child: Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                  vertical: 15
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
                       onTap: () {
                         setState(() {
-                          activeTool = 'eraser';
+                          activeTool = 'pen';
                         });
                       },
                       child: Container(
-                      child: Icon(
-                        Icons.crop_square
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
+                        child: Icon(
+                          Icons.brush
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            activeTool = 'eraser';
+                          });
+                        },
+                        child: Container(
+                        child: Icon(
+                          Icons.crop_square
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeTool = 'curve';
+                        });
+                      },
+                      child: Container(
+                        child: Icon(
+                          Icons.crop_square
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeTool = 'shape';
+                        });
+                      },
+                      child: Container(
+                        child: Icon(
+                          Icons.rectangle
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeTool = 'fill';
+                        });
+                      },
+                      child: Container(
+                        child: Icon(
+                          Icons.format_color_fill
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeTool = 'gradient';
+                        });
+                      },
+                      child: Container(
+                        child: Icon(
+                          Icons.gradient
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeTool = 'text';
+                        });
+                      },
+                      child: Container(
+                        child: Icon(
+                          Icons.text_fields
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      )
                     )
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'curve';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.crop_square
+                  ]
+                )
+              ),
+              scrollDirection: Axis.horizontal,
+            ),
+            Row(
+              children: (
+                (activeTool == 'pen' || activeTool == 'eraser') ?
+                  [
+                    TextButton(
+                      child: Text(
+                        'Коррекция 0'
                       ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
+                      onPressed: () {
+
+                      }
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          'Привязка'
+                        ),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.grid_3x3
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                            GestureDetector(
+                              child: Icon(
+                                Icons.more_vert
+                              ),
+                              onTap: () {
+
+                              }
+                            ),
+                          ]
+                        )
+                      ]
                     )
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'shape';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.rectangle
+                  ]
+                : (activeTool == 'curve') ?
+                  [
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.crop_square
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
                       ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
+                      onTap: () {
+                        setState(() {
+                          curve = 'rect';
+                        });
+                      }
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.circle_outlined
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
                       ),
+                      onTap: () {
+                        setState(() {
+                          curve = 'oval';
+                        });
+                      }
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.pentagon_outlined
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          curve = 'polygone';
+                        });
+                      }
                     )
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'fill';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.format_color_fill
+                  ]
+                : (activeTool == 'shape') ?
+                  [
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.rectangle
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
                       ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
+                      onTap: () {
+                        setState(() {
+                          shape = 'rect';
+                        });
+                      }
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.circle
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
                       ),
+                      onTap: () {
+                        setState(() {
+                          shape = 'oval';
+                        });
+                      }
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        child: Icon(
+                          Icons.pentagon
+                        ),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 15
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          shape = 'polygone';
+                        });
+                      }
                     )
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'gradient';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.gradient
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    )
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeTool = 'text';
-                      });
-                    },
-                    child: Container(
-                      child: Icon(
-                        Icons.text_fields
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    )
-                  )
-                ]
+                  ]
+                :
+                  [
+
+                  ]
               )
             ),
-            scrollDirection: Axis.horizontal,
-          ),
-          Row(
-            children: (
-              (activeTool == 'pen' || activeTool == 'eraser') ?
-                [
-                  TextButton(
-                    child: Text(
-                      'Коррекция 0'
-                    ),
-                    onPressed: () {
-
-                    }
+            GestureDetector(
+              child: Container(
+                child: CustomPaint(
+                  size: Size(
+                    canvasWidth,
+                    canvasHeight
                   ),
-                  Column(
-                    children: [
-                      Text(
-                        'Привязка'
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.grid_3x3
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                          GestureDetector(
-                            child: Icon(
-                              Icons.more_vert
-                            ),
-                            onTap: () {
-
-                            }
-                          ),
-                        ]
-                      )
-                    ]
-                  )
-                ]
-              : (activeTool == 'curve') ?
-                [
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.crop_square
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        curve = 'rect';
-                      });
-                    }
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.circle_outlined
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        curve = 'oval';
-                      });
-                    }
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.pentagon_outlined
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        curve = 'polygone';
-                      });
-                    }
-                  )
-                ]
-              : (activeTool == 'shape') ?
-                [
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.rectangle
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        shape = 'rect';
-                      });
-                    }
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.circle
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        shape = 'oval';
-                      });
-                    }
-                  ),
-                  GestureDetector(
-                    child: Container(
-                      child: Icon(
-                        Icons.pentagon
-                      ),
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 15
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        shape = 'polygone';
-                      });
-                    }
-                  )
-                ]
-              :
-                [
-
-                ]
-            )
-          ),
-          GestureDetector(
-            child: Container(
-              child: CustomPaint(
-                size: Size(
-                  canvasWidth,
-                  canvasHeight
+                  painter: softtrackCanvas
                 ),
-                painter: softtrackCanvas
+                width: canvasWidth,
+                height: canvasHeight
               ),
-              width: canvasWidth,
-              height: canvasHeight
+              onHorizontalDragStart: (event) {
+                onTouchStart(event, context);
+              },
+              onVerticalDragStart: (event) {
+                onTouchStart(event, context);
+              },
+              onHorizontalDragUpdate: (event) {
+                onTouchMove(event, context);
+              },
+              onVerticalDragUpdate: (event) {
+                onTouchMove(event, context);
+              },
+              onHorizontalDragEnd: (event) {
+                onTouchEnd(event, context);
+              },
+              onVerticalDragEnd: (event) {
+                onTouchEnd(event, context);
+              },
             ),
-            onHorizontalDragStart: (event) {
-              onTouchStart(event, context);
-            },
-            onVerticalDragStart: (event) {
-              onTouchStart(event, context);
-            },
-            onHorizontalDragUpdate: (event) {
-              onTouchMove(event, context);
-            },
-            onVerticalDragUpdate: (event) {
-              onTouchMove(event, context);
-            },
-            onHorizontalDragEnd: (event) {
-              onTouchEnd(event, context);
-            },
-            onVerticalDragEnd: (event) {
-              onTouchEnd(event, context);
-            },
-          ),
-          Draggable(
-            onDragEnd: (event) {
-              setState(() {
-                isPrefooterDraged = false;
-                preffoterDragLeft = event.offset.dx;
-                preffoterDragTop = event.offset.dy;
-                print('preffoterDragLeft: ${preffoterDragLeft}');
-                print('preffoterDragTop: ${preffoterDragTop}');
-              });
-            },
-            onDragStarted: () {
-              setState(() {
-                isPrefooterDraged = true;
-              });
-            },
-            feedback: prefooter,
-            child: (
-              isPrefooterDraged ?
-                Row()
-              :
-                Positioned(
-                  left: preffoterDragLeft,
-                  top: preffoterDragTop,
-                  child: prefooter
-                )
-            )
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PopupMenuButton<String>(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.menu
+            Draggable(
+              onDragEnd: (event) {
+                setState(() {
+                  isPrefooterDraged = false;
+                  preffoterDragLeft = event.offset.dx;
+                  preffoterDragTop = event.offset.dy;
+                  print('preffoterDragLeft: ${preffoterDragLeft}');
+                  print('preffoterDragTop: ${preffoterDragTop}');
+                });
+              },
+              onDragStarted: () {
+                setState(() {
+                  isPrefooterDraged = true;
+                });
+              },
+              feedback: prefooter,
+              child: (
+                isPrefooterDraged ?
+                  Row()
+                :
+                  Positioned(
+                    left: preffoterDragLeft,
+                    top: preffoterDragTop,
+                    child: prefooter
                   )
-                ),
-                itemBuilder: (BuildContext context) {
-                  return menuContextMenuItems.map((String menuContextMenuItem) {
-                    return  PopupMenuItem<String>(
-                      value: menuContextMenuItem,
-                      child: Text(menuContextMenuItem),
-                    );}
-                  ).toList();
-                },
-                onSelected: (item) async {
-                 if (false) {
-
-                 } else if (item == 'Экспорт PNG / JPG файлы') {
-                   showDialog(
-                     context: context,
-                     builder: (BuildContext context) => StatefulBuilder(
-                       builder: (BuildContext context, StateSetter setState) =>  AlertDialog(
-                         title: Text(
-                          'Формат файла'
-                         ),
-                         content: Container(
-                           height: 150,
-                           child: Column(
-                             children: [
-                               Row(
-                                 children: [
-                                  Radio<FileFormatType>(
-                                   value: FileFormatType.png,
-                                   groupValue: selectedFileFormat,
-                                   onChanged: (value) {
-                                     setState(() {
-                                       selectedFileFormat = value!;
-                                     });
-                                   }
-                                  ),
-                                  Text(
-                                    'PNG'
-                                  )
-                                ]
-                               ),
-                               Row(
-                                 children: [
-                                   Radio<FileFormatType>(
-                                     value: FileFormatType.pngTransparency,
-                                     groupValue: selectedFileFormat,
-                                     onChanged: (value) {
-                                       setState(() {
-                                         selectedFileFormat = value!;
-                                       });
-                                     }
-                                   ),
-                                   Text(
-                                     'PNG (прозрачный)'
-                                   )
-                                 ]
-                               ),
-                               Row(
-                                 children: [
-                                   Radio<FileFormatType>(
-                                     value: FileFormatType.jpg,
-                                     groupValue: selectedFileFormat,
-                                     onChanged: (value) {
-                                       setState(() {
-                                         selectedFileFormat = value!;
-                                       });
-                                     }
-                                   ),
-                                   Text(
-                                     'JPG'
-                                   )
-                                 ]
-                               ),
-                             ]
-                           )
-                         ),
-                         actions: [
-                           TextButton(
-                             child: Text(
-                               'Отмена'
-                             ),
-                             onPressed: () {
-                               return Navigator.pop(context, 'Cancel');
-                             }
-                           ),
-                           TextButton(
-                             child: Text(
-                               'ОК'
-                             ),
-                             onPressed: () {
-                               String format = 'png';
-                               if (selectedFileFormat == FileFormatType.png) {
-                                 format = 'png';
-                               } else if (selectedFileFormat == FileFormatType.pngTransparency) {
-                                 format = 'png';
-                               } else if (selectedFileFormat == FileFormatType.jpg) {
-                                 format = 'jpg';
-                               }
-                               softtrackCanvas.getCapture(format);
-                               return Navigator.pop(context, 'OK');
-                             }
-                           ),
-                         ]
-                       )
-                     )
-                   );
-                 } else if (item == 'Справка') {
-                   final String url = 'https://medibangpaint.com/ru/android/use/';
-                   await launch(url);
-                 } else if (item == 'Калибровка гидролокатора пера') {
-                   final String url = 'market://details?id=com.greenbulb.calibrate';
-                   if (await canLaunch(url))
-                    await launch(url);
-                 }
-                }
-              ),
-              PopupMenuButton(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.edit
-                  )
-                ),
-                itemBuilder: (BuildContext context) {
-                  return editContextMenuItems.map((String editContextMenuItem) {
-                    return PopupMenuItem<String>(
-                      value: editContextMenuItem,
-                      child: Text(editContextMenuItem)
-                    );}
-                  ).toList();
-                },
-              ),
-              PopupMenuButton(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.select_all
-                  )
-                ),
-                itemBuilder: (BuildContext context) {
-                  return selectionContextMenuItems.map((String selectionContextMenuItem) {
-                    return PopupMenuItem<String>(
-                        value: selectionContextMenuItem,
-                        child: Text(selectionContextMenuItem)
-                    );}
-                  ).toList();
-                },
-              ),
-              PopupMenuButton(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.screen_rotation
-                  )
-                ),
-                itemBuilder: (BuildContext context) {
-                  return toggleOrientationContextMenuItems.map((String toggleOrientationContextMenuItem) {
-                    return PopupMenuItem<String>(
-                      value: toggleOrientationContextMenuItem,
-                      child: Text(toggleOrientationContextMenuItem)
-                    );}
-                  ).toList();
-                },
-                onSelected: (item) {
-                  if (item == 'Поворот влево') {
-                    setState(() {
-                      canvasRotation += 15.0;
-                    });
-                  } else if (item == 'Поворот вправо') {
-                    setState(() {
-                      canvasRotation -= 15.0;
-                    });
-                  } else if (item == 'Отразить по горизонтали') {
-                    setState(() {
-                      canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
-                    });
-                  } else if (item == 'Сброс') {
-                    setState(() {
-                      canvasRotation = 0.0;
-                      canvasScale = {
-                        'x': 1.0,
-                        'y': 1.0
-                      };
-                    });
-                  }
-                }
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.brush
-                  )
-                ),
-                onTap:() {
-
-                },
-              ),
-              GestureDetector(
-                child: Container(
+              )
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PopupMenuButton<String>(
+                  child: Container(
                     margin: EdgeInsets.symmetric(
                       horizontal: 10
                     ),
                     child: Icon(
-                      Icons.palette
+                      Icons.menu
                     )
-                ),
-                onTap:() {
-                  scaffoldKey.currentState!.openDrawer();
-                },
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
                   ),
-                  child: Icon(
-                    Icons.layers
-                  )
-                ),
-                onTap:() {
-                  scaffoldKey.currentState!.openEndDrawer();
-                },
-              ),
-              GestureDetector(
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                  ),
-                  child: Icon(
-                    Icons.circle_outlined
-                  )
-                ),
-                onTap:() {
+                  itemBuilder: (BuildContext context) {
+                    return menuContextMenuItems.map((String menuContextMenuItem) {
+                      return  PopupMenuItem<String>(
+                        value: menuContextMenuItem,
+                        child: Text(menuContextMenuItem),
+                      );}
+                    ).toList();
+                  },
+                  onSelected: (item) async {
+                   if (false) {
 
-                },
-              ),
-            ]
+                   } else if (item == 'Экспорт PNG / JPG файлы') {
+                     showDialog(
+                       context: context,
+                       builder: (BuildContext context) => StatefulBuilder(
+                         builder: (BuildContext context, StateSetter setState) =>  AlertDialog(
+                           title: Text(
+                            'Формат файла'
+                           ),
+                           content: Container(
+                             height: 150,
+                             child: Column(
+                               children: [
+                                 Row(
+                                   children: [
+                                    Radio<FileFormatType>(
+                                     value: FileFormatType.png,
+                                     groupValue: selectedFileFormat,
+                                     onChanged: (value) {
+                                       setState(() {
+                                         selectedFileFormat = value!;
+                                       });
+                                     }
+                                    ),
+                                    Text(
+                                      'PNG'
+                                    )
+                                  ]
+                                 ),
+                                 Row(
+                                   children: [
+                                     Radio<FileFormatType>(
+                                       value: FileFormatType.pngTransparency,
+                                       groupValue: selectedFileFormat,
+                                       onChanged: (value) {
+                                         setState(() {
+                                           selectedFileFormat = value!;
+                                         });
+                                       }
+                                     ),
+                                     Text(
+                                       'PNG (прозрачный)'
+                                     )
+                                   ]
+                                 ),
+                                 Row(
+                                   children: [
+                                     Radio<FileFormatType>(
+                                       value: FileFormatType.jpg,
+                                       groupValue: selectedFileFormat,
+                                       onChanged: (value) {
+                                         setState(() {
+                                           selectedFileFormat = value!;
+                                         });
+                                       }
+                                     ),
+                                     Text(
+                                       'JPG'
+                                     )
+                                   ]
+                                 ),
+                               ]
+                             )
+                           ),
+                           actions: [
+                             TextButton(
+                               child: Text(
+                                 'Отмена'
+                               ),
+                               onPressed: () {
+                                 return Navigator.pop(context, 'Cancel');
+                               }
+                             ),
+                             TextButton(
+                               child: Text(
+                                 'ОК'
+                               ),
+                               onPressed: () {
+                                 String format = 'png';
+                                 if (selectedFileFormat == FileFormatType.png) {
+                                   format = 'png';
+                                 } else if (selectedFileFormat == FileFormatType.pngTransparency) {
+                                   format = 'png';
+                                 } else if (selectedFileFormat == FileFormatType.jpg) {
+                                   format = 'jpg';
+                                 }
+                                 softtrackCanvas.getCapture(format);
+                                 return Navigator.pop(context, 'OK');
+                               }
+                             ),
+                           ]
+                         )
+                       )
+                     );
+                   } else if (item == 'Справка') {
+                     final String url = 'https://medibangpaint.com/ru/android/use/';
+                     await launch(url);
+                   } else if (item == 'Калибровка гидролокатора пера') {
+                     final String url = 'market://details?id=com.greenbulb.calibrate';
+                     if (await canLaunch(url))
+                      await launch(url);
+                   }
+                  }
+                ),
+                PopupMenuButton(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.edit
+                    )
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return editContextMenuItems.map((String editContextMenuItem) {
+                      return PopupMenuItem<String>(
+                        value: editContextMenuItem,
+                        child: Text(editContextMenuItem)
+                      );}
+                    ).toList();
+                  },
+                ),
+                PopupMenuButton(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.select_all
+                    )
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return selectionContextMenuItems.map((String selectionContextMenuItem) {
+                      return PopupMenuItem<String>(
+                          value: selectionContextMenuItem,
+                          child: Text(selectionContextMenuItem)
+                      );}
+                    ).toList();
+                  },
+                ),
+                PopupMenuButton(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.screen_rotation
+                    )
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return toggleOrientationContextMenuItems.map((String toggleOrientationContextMenuItem) {
+                      return PopupMenuItem<String>(
+                        value: toggleOrientationContextMenuItem,
+                        child: Text(toggleOrientationContextMenuItem)
+                      );}
+                    ).toList();
+                  },
+                  onSelected: (item) {
+                    if (item == 'Поворот влево') {
+                      setState(() {
+                        canvasRotation += 15.0;
+                      });
+                    } else if (item == 'Поворот вправо') {
+                      setState(() {
+                        canvasRotation -= 15.0;
+                      });
+                    } else if (item == 'Отразить по горизонтали') {
+                      setState(() {
+                        canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
+                      });
+                    } else if (item == 'Сброс') {
+                      setState(() {
+                        canvasRotation = 0.0;
+                        canvasScale = {
+                          'x': 1.0,
+                          'y': 1.0
+                        };
+                      });
+                    }
+                  }
+                ),
+                GestureDetector(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.brush
+                    )
+                  ),
+                  onTap:() {
+
+                  },
+                ),
+                GestureDetector(
+                  child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: 10
+                      ),
+                      child: Icon(
+                        Icons.palette
+                      )
+                  ),
+                  onTap:() {
+                    scaffoldKey.currentState!.openDrawer();
+                  },
+                ),
+                GestureDetector(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.layers
+                    )
+                  ),
+                  onTap:() {
+                    scaffoldKey.currentState!.openEndDrawer();
+                  },
+                ),
+                GestureDetector(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10
+                    ),
+                    child: Icon(
+                      Icons.circle_outlined
+                    )
+                  ),
+                  onTap:() {
+
+                  },
+                ),
+              ]
+            )
+          ]
+        ),
+        drawer: Drawer(
+          child: Container(
+            padding: EdgeInsets.all(25),
+            child: Column(
+              children: [
+                Text(
+                  'Палитра'
+                ),
+                ColorPicker(
+                  pickerColor: paleteColor,
+                  onColorChanged: (Color color) {
+                    setState(() {
+                      paleteColor = color;
+                    });
+                  },
+                  pickerAreaBorderRadius: BorderRadius.circular(1000.0),
+                )
+              ]
+            )
           )
-        ]
-      ),
-      drawer: Drawer(
-        child: Container(
-          padding: EdgeInsets.all(25),
-          child: Column(
-            children: [
-              Text(
-                'Палитра'
-              ),
-              ColorPicker(
-                pickerColor: paleteColor,
-                onColorChanged: (Color color) {
-                  setState(() {
-                    paleteColor = color;
-                  });
-                },
-                pickerAreaBorderRadius: BorderRadius.circular(1000.0),
-              )
-            ]
+        ),
+        endDrawer: Drawer(
+          child: Container(
+            padding: EdgeInsets.all(25),
+            child: Column(
+              children: [
+                Text(
+                  'Слои'
+                ),
+                FutureBuilder(
+                  future: getLayers,
+                  builder: (BuildContext context, AsyncSnapshot<List<Widget>> snapshot) {
+                    int snapshotsCount = 0;
+                    if (snapshot.data != null) {
+                      snapshotsCount = snapshot.data!.length;
+                      layers = [];
+                      for (int snapshotIndex = 0; snapshotIndex < snapshotsCount; snapshotIndex++) {
+                        int layerIndex = snapshotIndex;
+                        // setState(() {
+                          layers.add(
+                              GestureDetector(
+                                  child: Container(
+                                      child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                      Icons.remove_red_eye
+                                                  ),
+                                                  Icon(
+                                                      Icons.rectangle
+                                                  ),
+                                                  Text(
+                                                      'Слой 1'
+                                                  )
+                                                ]
+                                            ),
+                                            Icon(
+                                                Icons.settings
+                                            )
+                                          ]
+                                      ),
+                                      decoration: BoxDecoration(
+                                          color: (
+                                              activeLayer == layerIndex ?
+                                              Color.fromARGB(255, 200, 200, 200)
+                                                  :
+                                              Color.fromARGB(255, 255, 255, 255)
+                                          )
+                                      )
+                                  ),
+                                  onTap: () {
+                                    print('layerIndex: ${layerIndex}');
+                                    activeLayer = layerIndex;
+                                    print('activeLayer: ${activeLayer}');
+                                  }
+                              )
+                          );
+                        // });
+                      }
+                    }
+                    if (snapshot.hasData) {
+                      return Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(
+                              25
+                            ),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: layers
+                              )
+                            )
+                          )
+                        ]
+                      );
+                    } else {
+                      return Column(
+
+                      );
+                    }
+                    return Column(
+
+                    );
+                  }
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      child: Icon(
+                        Icons.add
+                      ),
+                      onTap: () {
+                        addLayer(layers.length);
+                      }
+                    ),
+                    GestureDetector(
+                      child: Icon(
+                        Icons.delete
+                      ),
+                      onTap: () {
+
+                      }
+                    ),
+                    GestureDetector(
+                      child: Icon(
+                        Icons.arrow_upward
+                      ),
+                      onTap: () {
+
+                      }
+                    ),
+                    GestureDetector(
+                      child: Icon(
+                        Icons.arrow_upward
+                      ),
+                      onTap: () {
+
+                      }
+                    ),
+                    GestureDetector(
+                        child: Icon(
+                          Icons.lock
+                        ),
+                        onTap: () {
+
+                        }
+                    ),
+                    GestureDetector(
+                      child: Icon(
+                        Icons.more_vert
+                      ),
+                      onTap: () {
+
+                      }
+                    ),
+                  ]
+                )
+              ]
+            )
           )
         )
       ),
-      endDrawer: Drawer(
-        child: Container(
-          padding: EdgeInsets.all(25),
-          child: Column(
-            children: [
-              Text(
-                'Слои'
-              )
-            ]
-          )
-        )
-      )
+      onWillPop: () {
+        return Future<bool>(() {
+          Navigator.pushNamed(context, '/welcome');
+          return false;
+        });
+      }
     );
   }
 }

@@ -8,6 +8,7 @@ import 'dart:io';
 // import 'package:ext_storage/ext_storage.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SofttrackCanvas extends CustomPainter {
@@ -33,6 +34,11 @@ class SofttrackCanvas extends CustomPainter {
     this.canvasBackgroundColor = canvasBackgroundColor;
   }
 
+  Future<String> get _localPath async {
+    final directory = await getTemporaryDirectory();
+    return directory.path;
+  }
+
   getCapture(String format) async {
     var recorder = await new ui.PictureRecorder();
     var origin = new Offset(0.0, 0.0);
@@ -43,10 +49,14 @@ class SofttrackCanvas extends CustomPainter {
     ui.Image image = await picture.toImage(415, 550);
     ByteData data = await image.toByteData(format: ui.ImageByteFormat.png) as ByteData;
     Uint8List decodedImage = data.buffer.asUint8List();
-    String fileName = 'expanded_graphic_editor_render.${format}';
+    // String fileName = 'expanded_graphic_editor_render.${format}';
+    DateTime currentDateTime = DateTime.now();
+    String fileName = '${currentDateTime.millisecondsSinceEpoch}.${format}';
     Directory? downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
     String downloadsDirectoryPath = downloadsDirectory!.path;
-    String path = '${downloadsDirectoryPath}/${fileName}';
+    // String path = '${downloadsDirectoryPath}/${fileName}';
+    String appDir = await _localPath;
+    String path = '${appDir}/${fileName}';
     final file = File(path);
     await file.writeAsBytes(decodedImage);
     Fluttertoast.showToast(
@@ -63,8 +73,6 @@ class SofttrackCanvas extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // var capture = await getCapture(size);
-    // print('capture: ${capture}');
     canvas.rotate(canvasRotation);
     double canvasScaleX = canvasScale['x'] as double;
     double canvasScaleY = canvasScale['y'] as double;

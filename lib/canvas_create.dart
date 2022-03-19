@@ -127,7 +127,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) => StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setState) =>  AlertDialog(
+                      builder: (BuildContext context, StateSetter localSetState) =>  AlertDialog(
                         content: Container(
                           height: 500,
                           child: Column(
@@ -149,10 +149,12 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                         onChanged: (value) {
                                           setState(() {
                                             width = value;
+                                          });
+                                          localSetState(() {
                                             widthController.text = width;
                                             widthController.selection = TextSelection(
-                                              baseOffset: width.length,
-                                              extentOffset: width.length
+                                                baseOffset: width.length,
+                                                extentOffset: width.length
                                             );
                                           });
                                         },
@@ -170,7 +172,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                           color: Colors.deepPurpleAccent,
                                         ),
                                         onChanged: (String? newValue) {
-                                          setState(() {
+                                          localSetState(() {
                                             widthMeasure = newValue!;
                                           });
                                         },
@@ -203,6 +205,8 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                         onChanged: (value) {
                                           setState(() {
                                             height = value;
+                                          });
+                                          localSetState(() {
                                             heightController.text = height;
                                             heightController.selection = TextSelection(
                                               baseOffset: height.length,
@@ -216,7 +220,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                       child: DropdownButton<String>(
                                         value: heightMeasure,
                                         icon: const Icon(
-                                            Icons.arrow_drop_down
+                                          Icons.arrow_drop_down
                                         ),
                                         isExpanded: true,
                                         underline: Container(
@@ -224,7 +228,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                           color: Colors.deepPurpleAccent,
                                         ),
                                         onChanged: (String? newValue) {
-                                          setState(() {
+                                          localSetState(() {
                                             heightMeasure = newValue!;
                                           });
                                         },
@@ -270,7 +274,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                 child: DropdownButton<String>(
                                   value: paperSize,
                                   icon: const Icon(
-                                      Icons.arrow_drop_down
+                                    Icons.arrow_drop_down
                                   ),
                                   isExpanded: true,
                                   underline: Container(
@@ -278,7 +282,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                     color: Colors.deepPurpleAccent,
                                   ),
                                   onChanged: (String? newValue) {
-                                    setState(() {
+                                    localSetState(() {
                                       paperSize = newValue!;
                                     });
                                   },
@@ -303,7 +307,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                         value: BackgroundColorType.color,
                                         groupValue: selectedBackgroundColor,
                                         onChanged: (value) {
-                                          setState(() {
+                                          localSetState(() {
                                             selectedBackgroundColor = value!;
                                           });
                                         }
@@ -319,7 +323,7 @@ class _CanvasCreatePageState extends State<CanvasCreatePage> {
                                           value: BackgroundColorType.transparent,
                                           groupValue: selectedBackgroundColor,
                                           onChanged: (value) {
-                                            setState(() {
+                                            localSetState(() {
                                               selectedBackgroundColor = value!;
                                             });
                                           }

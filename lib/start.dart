@@ -109,6 +109,9 @@ class _StartPageState extends State<StartPage> {
               Column(
                 children: [
                   GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/gallery');
+                    },
                     child: Container(
                       width: 100,
                       height: 100,
