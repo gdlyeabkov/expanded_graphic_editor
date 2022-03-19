@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graphiceditor/canvas_create.dart';
 import 'package:graphiceditor/softtrack_canvas.dart';
@@ -115,6 +116,16 @@ class _MyHomePageState extends State<MyHomePage> {
   int canvasDpi = 350;
   String canvasPaperSize = 'A4';
   Color canvasBackgroundColor = Colors.white;
+  bool isSelectionMode = false;
+  List selections = [
+    {
+      'x1': 0.0,
+      'y1': 0.0,
+      'x2': 0.0,
+      'y2': 0.0,
+      'selected': false,
+    }
+  ];
   late SofttrackCanvas softtrackCanvas;
   FileFormatType selectedFileFormat = FileFormatType.png;
   Row prefooter = Row();
@@ -125,10 +136,17 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> layers = [
 
   ];
+  int minTouches = 2;
 
   Future<List<Widget>> get getLayers async {
     return layers;
   }
+
+  void onTap(bool correctNumberOfTouches) {
+    print("Tapped with $correctNumberOfTouches finger(s)");
+
+  }
+
 
   addLayer(int layerIndexS) {
       int layerIndex = layers.length;
@@ -213,6 +231,14 @@ class _MyHomePageState extends State<MyHomePage> {
             'shapeType': shape,
           });
         }
+      } else if (activeTool == 'selection') {
+        selections[0] = {
+          'x1': touchX,
+          'y1': touchY,
+          'x2': touchX,
+          'y2': touchY,
+          'selected': false
+        };
       }
     });
   }
@@ -244,13 +270,15 @@ class _MyHomePageState extends State<MyHomePage> {
       } else if (activeTool == 'shape') {
         shapes[shapes.length - 1]['x2'] = touchX;
         shapes[shapes.length - 1]['y2'] = touchY;
+      } else if (activeTool == 'selection') {
+        selections[0]['x2'] = touchX;
+        selections[0]['y2'] = touchY;
       }
     });
   }
 
   onTouchEnd(event, context) {
     setState(() {
-
       if (activeTool == 'curve') {
         if (curve == 'polygone') {
           if (points.length >= 3) {
@@ -569,6 +597,12 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           )
         );
+      } else if (activeTool == 'selection') {
+        setState(() {
+          selections[0]['x2'] = touchX;
+          selections[0]['y2'] = touchY;
+          selections[0]['selected'] = true;
+        });
       }
     });
   }
@@ -738,7 +772,7 @@ class _MyHomePageState extends State<MyHomePage> {
         canvasPaperSize = arguments['paperSize'];
         canvasBackgroundColor = arguments['backgroundColor'];
       }
-      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor);
+      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections);
     });
 
     return WillPopScope(
@@ -1050,35 +1084,101 @@ class _MyHomePageState extends State<MyHomePage> {
               )
             ),
             GestureDetector(
-              child: Container(
-                child: CustomPaint(
-                  size: Size(
-                    canvasWidth,
-                    canvasHeight
+              onScaleUpdate: (event) {
+                print('onScaleUpdate: ${event.scale}');
+                setState(() {
+                  canvasScale = {
+                    'x': event.scale,
+                    'y': event.scale
+                  };
+                });
+              },
+              child: RawGestureDetector(
+                gestures: {
+                  MultiTouchGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                      MultiTouchGestureRecognizer>(
+                        () => MultiTouchGestureRecognizer(),
+                        (MultiTouchGestureRecognizer instance) {
+                      instance.minNumberOfTouches = this.minTouches;
+                      instance.onMultiTap = (correctNumberOfTouches) => this.onTap(correctNumberOfTouches);
+                    },
+                  )
+                },
+                // onPanUpdate: (event) {
+                //   print('onPanUpdate: ${event.localPosition.direction}');
+                //   setState(() {
+                //     canvasRotation += event.localPosition.direction;
+                //   });
+                // },
+                // поворот работает коряво
+                child: GestureDetector(
+                  child: Container(
+                    child: CustomPaint(
+                      size: Size(
+                        canvasWidth,
+                        canvasHeight
+                      ),
+                      child: (
+                        isSelectionMode ?
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isSelectionMode = false;
+                                    selections[0] = {
+                                      'x1': 0.0,
+                                      'y1': 0.0,
+                                      'x2': 0.0,
+                                      'y2': 0.0,
+                                      'selected': false
+                                    };
+                                  });
+                                },
+                                child: Text(
+                                  'Отменить выделение'
+                                ),
+                                style: ButtonStyle(
+                                  foregroundColor: MaterialStateProperty.all<Color>(
+                                    Color.fromARGB(255, 255, 255, 255)
+                                  ),
+                                  backgroundColor: MaterialStateProperty.all<Color>(
+                                    Color.fromARGB(255, 150, 150, 150)
+                                  ),
+                                )
+                              )
+                            ]
+                          )
+                        :
+                          Row()
+                      ),
+                      painter: softtrackCanvas
+                    ),
+                    width: canvasWidth,
+                    height: canvasHeight
                   ),
-                  painter: softtrackCanvas
-                ),
-                width: canvasWidth,
-                height: canvasHeight
-              ),
-              onHorizontalDragStart: (event) {
-                onTouchStart(event, context);
-              },
-              onVerticalDragStart: (event) {
-                onTouchStart(event, context);
-              },
-              onHorizontalDragUpdate: (event) {
-                onTouchMove(event, context);
-              },
-              onVerticalDragUpdate: (event) {
-                onTouchMove(event, context);
-              },
-              onHorizontalDragEnd: (event) {
-                onTouchEnd(event, context);
-              },
-              onVerticalDragEnd: (event) {
-                onTouchEnd(event, context);
-              },
+                  onHorizontalDragStart: (event) {
+                    onTouchStart(event, context);
+                  },
+                  onVerticalDragStart: (event) {
+                    onTouchStart(event, context);
+                  },
+                  onHorizontalDragUpdate: (event) {
+                    onTouchMove(event, context);
+                  },
+                  onVerticalDragUpdate: (event) {
+                    onTouchMove(event, context);
+                  },
+                  onHorizontalDragEnd: (event) {
+                    onTouchEnd(event, context);
+                  },
+                  onVerticalDragEnd: (event) {
+                    onTouchEnd(event, context);
+                  },
+                )
+              )
             ),
             Draggable(
               onDragEnd: (event) {
@@ -1263,10 +1363,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemBuilder: (BuildContext context) {
                     return selectionContextMenuItems.map((String selectionContextMenuItem) {
                       return PopupMenuItem<String>(
-                          value: selectionContextMenuItem,
-                          child: Text(selectionContextMenuItem)
+                        value: selectionContextMenuItem,
+                        child: Text(selectionContextMenuItem)
                       );}
                     ).toList();
+                  },
+                  onSelected: (item) {
+                    if (item == 'Выбрать область') {
+                      setState(() {
+                        activeTool = 'selection';
+                        isSelectionMode = true;
+                      });
+                    } else if (item == 'Преобразование') {
+                      // canvasMatrix =
+                    }
                   },
                 ),
                 PopupMenuButton(
@@ -1540,4 +1650,44 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     );
   }
+}
+
+typedef MultiTouchGestureRecognizerCallback = void Function(bool correctNumberOfTouches);
+
+class MultiTouchGestureRecognizer extends MultiTapGestureRecognizer {
+
+  MultiTouchGestureRecognizerCallback onMultiTap = (pointer) => {
+    print("Tapped with correctNumberOfTouches finger(s)");
+  };
+  var numberOfTouches = 0;
+  int minNumberOfTouches = 0;
+
+  MultiTouchGestureRecognizer() {
+    super.onTapDown = (pointer, details) => this.addTouch(pointer, details);
+    super.onTapUp = (pointer, details) => this.removeTouch(pointer, details);
+    super.onTapCancel = (pointer) => this.cancelTouch(pointer);
+    super.onTap = (pointer) => this.captureDefaultTap(pointer);
+  }
+
+  void addTouch(int pointer, TapDownDetails details) {
+    this.numberOfTouches++;
+  }
+
+  void removeTouch(int pointer, TapUpDetails details) {
+    if (this.numberOfTouches == this.minNumberOfTouches) {
+      // this.onMultiTap(true);
+    }
+    else if (this.numberOfTouches != 0) {
+      // this.onMultiTap(false);
+    }
+
+    this.numberOfTouches = 0;
+  }
+
+  void cancelTouch(int pointer) {
+    this.numberOfTouches = 0;
+  }
+
+  void captureDefaultTap(int pointer) {}
+
 }

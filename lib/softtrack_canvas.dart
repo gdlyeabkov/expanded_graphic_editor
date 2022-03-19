@@ -1,4 +1,5 @@
 // import 'dart:html';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -23,8 +24,20 @@ class SofttrackCanvas extends CustomPainter {
     'y': 1.0
   };
   Color canvasBackgroundColor = Colors.white;
+  double canvasWidth = 1007.0;
+  double canvasHeight = 1414.0;
+  bool isSelectionMode = false;
+  List selections = [
+    {
+      'x1': 0.0,
+      'y1': 0.0,
+      'x2': 0.0,
+      'y2': 0.0,
+      'selected': false,
+    }
+  ];
 
-  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor) {
+  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections) {
     this.context = context;
     this.touchX = touchX;
     this.touchY = touchY;
@@ -32,6 +45,10 @@ class SofttrackCanvas extends CustomPainter {
     this.canvasRotation = canvasRotation;
     this.canvasScale = canvasScale;
     this.canvasBackgroundColor = canvasBackgroundColor;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+    this.isSelectionMode = isSelectionMode;
+    this.selections = selections;
   }
 
   Future<String> get _localPath async {
@@ -73,7 +90,50 @@ class SofttrackCanvas extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+
+    Float64List matrix4 = Float64List(16);
+    // matrix4.add(0.0);
+    // matrix4.add(0.2);
+    // matrix4.add(0.4);
+    // matrix4.add(0.6);
+    // matrix4.add(0.8);
+    // matrix4.add(0.8);
+    // matrix4.add(1.0);
+    // matrix4.add(1.2);
+    // matrix4.add(1.4);
+    // matrix4.add(1.6);
+    // matrix4.add(1.8);
+    // matrix4.add(2.0);
+    // matrix4.add(2.2);
+    // matrix4.add(2.4);
+    // matrix4.add(2.6);
+    // matrix4.add(2.8);
+    // canvas.transform(matrix4);
+
+    if (isSelectionMode) {
+      double x1 = selections[0]['x1'];
+      double y1 = selections[0]['y1'];
+      double x2 = selections[0]['x2'];
+      double y2 = selections[0]['y2'];
+      bool selected = selections[0]['selected'];
+      canvas.drawColor(Color.fromARGB(75, 0, 100, 255), BlendMode.colorBurn);
+      if (selected) {
+        canvas.clipRect(Rect.fromPoints(Offset(x1, y1), Offset(x2, y2)));
+      }
+      canvas.drawRect(Rect.fromPoints(Offset(x1, y1), Offset(x2, y2)), Paint()..style = PaintingStyle.fill..color = Colors.white);
+
+    }
+
+    final double r = sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight) / 2;
+    final alpha = atan(canvasHeight / canvasWidth);
+    final beta = alpha + canvasRotation;
+    final shiftY = r * sin(beta);
+    final shiftX = r * cos(beta);
+    final translateX = canvasWidth / 2 - shiftX;
+    final translateY = canvasHeight / 2 - shiftY;
+    canvas.translate(translateX, translateY);
     canvas.rotate(canvasRotation);
+
     double canvasScaleX = canvasScale['x'] as double;
     double canvasScaleY = canvasScale['y'] as double;
     canvas.scale(canvasScaleX, canvasScaleY);
