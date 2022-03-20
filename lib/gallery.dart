@@ -141,8 +141,15 @@ class _GalleryPageState extends State<GalleryPage> {
                     25
                   ),
                   child: SingleChildScrollView(
-                    child: Wrap(
-                      children: files
+                    scrollDirection: Axis.vertical,
+                    child: Container(
+                      child: Column(
+                        children: [
+                          Wrap(
+                            children: files
+                          )
+                        ]
+                      )
                     )
                   )
                 )

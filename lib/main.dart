@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graphiceditor/canvas_create.dart';
 import 'package:graphiceditor/softtrack_canvas.dart';
 import 'package:graphiceditor/start.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:touchable/touchable.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -137,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ];
   int minTouches = 2;
+  bool isToolBarVisible = true;
 
   Future<List<Widget>> get getLayers async {
     return layers;
@@ -644,44 +646,44 @@ class _MyHomePageState extends State<MyHomePage> {
             )
         ),
         GestureDetector(
-            child: Container(
-                margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                ),
-                child: Icon(
-                    Icons.brush
-                )
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 10
             ),
-            onTap: () {
-              setState(() {
-                activeTool = 'pen';
-              });
-            }
-        ),
-        GestureDetector(
-            child: Container(
-                margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                ),
-                child: Icon(
-                    Icons.check_box_outline_blank
-                )
-            ),
-            onTap: () {
-              setState(() {
-                activeTool = 'eraser';
-              });
-            }
-        ),
-        GestureDetector(
-            child: Container(
-                margin: EdgeInsets.symmetric(
-                    horizontal: 10
-                ),
-                child: Icon(
-                    Icons.check_box_outline_blank
-                )
+            child: Icon(
+              Icons.brush
             )
+          ),
+          onTap: () {
+            setState(() {
+              activeTool = 'pen';
+            });
+          }
+        ),
+        GestureDetector(
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 10
+            ),
+            child: Icon(
+              Icons.check_box_outline_blank
+            )
+          ),
+          onTap: () {
+            setState(() {
+              activeTool = 'eraser';
+            });
+          }
+        ),
+        GestureDetector(
+          child: Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 10
+            ),
+            child: Icon(
+              Icons.check_box_outline_blank
+            )
+          )
         ),
         TextButton(
             child: Text(
@@ -784,304 +786,313 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SingleChildScrollView(
-              child: Container(
-                margin: EdgeInsets.symmetric(
-                  vertical: 15
-                ),
-                child: Row(
+            (
+              isToolBarVisible ?
+                Column(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'pen';
-                        });
-                      },
+                    SingleChildScrollView(
                       child: Container(
-                        child: Icon(
-                          Icons.brush
-                        ),
                         margin: EdgeInsets.symmetric(
-                          horizontal: 15
+                          vertical: 15
                         ),
-                      )
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'pen';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.brush
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    activeTool = 'eraser';
+                                  });
+                                },
+                                child: Container(
+                                child: Icon(
+                                  Icons.crop_square
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'curve';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.crop_square
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'shape';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.rectangle
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'fill';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.format_color_fill
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'gradient';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.gradient
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  activeTool = 'text';
+                                });
+                              },
+                              child: Container(
+                                child: Icon(
+                                  Icons.text_fields
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              )
+                            )
+                          ]
+                        )
+                      ),
+                      scrollDirection: Axis.horizontal,
                     ),
-                    GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            activeTool = 'eraser';
-                          });
-                        },
-                        child: Container(
-                        child: Icon(
-                          Icons.crop_square
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      )
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'curve';
-                        });
-                      },
-                      child: Container(
-                        child: Icon(
-                          Icons.crop_square
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      )
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'shape';
-                        });
-                      },
-                      child: Container(
-                        child: Icon(
-                          Icons.rectangle
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      )
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'fill';
-                        });
-                      },
-                      child: Container(
-                        child: Icon(
-                          Icons.format_color_fill
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      )
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'gradient';
-                        });
-                      },
-                      child: Container(
-                        child: Icon(
-                          Icons.gradient
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      )
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeTool = 'text';
-                        });
-                      },
-                      child: Container(
-                        child: Icon(
-                          Icons.text_fields
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
+                    Row(
+                      children: (
+                        (activeTool == 'pen' || activeTool == 'eraser') ?
+                          [
+                            TextButton(
+                              child: Text(
+                                'Коррекция 0'
+                              ),
+                              onPressed: () {
+
+                              }
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  'Привязка'
+                                ),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.grid_3x3
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                    GestureDetector(
+                                      child: Icon(
+                                        Icons.more_vert
+                                      ),
+                                      onTap: () {
+
+                                      }
+                                    ),
+                                  ]
+                                )
+                              ]
+                            )
+                          ]
+                        : (activeTool == 'curve') ?
+                          [
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.crop_square
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  curve = 'rect';
+                                });
+                              }
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.circle_outlined
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  curve = 'oval';
+                                });
+                              }
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.pentagon_outlined
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  curve = 'polygone';
+                                });
+                              }
+                            )
+                          ]
+                        : (activeTool == 'shape') ?
+                          [
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.rectangle
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  shape = 'rect';
+                                });
+                              }
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.circle
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  shape = 'oval';
+                                });
+                              }
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Icon(
+                                  Icons.pentagon
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  shape = 'polygone';
+                                });
+                              }
+                            )
+                          ]
+                        :
+                          [
+
+                          ]
                       )
                     )
                   ]
                 )
-              ),
-              scrollDirection: Axis.horizontal,
-            ),
-            Row(
-              children: (
-                (activeTool == 'pen' || activeTool == 'eraser') ?
-                  [
-                    TextButton(
-                      child: Text(
-                        'Коррекция 0'
-                      ),
-                      onPressed: () {
-
-                      }
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          'Привязка'
-                        ),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.grid_3x3
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                            GestureDetector(
-                              child: Icon(
-                                Icons.more_vert
-                              ),
-                              onTap: () {
-
-                              }
-                            ),
-                          ]
-                        )
-                      ]
-                    )
-                  ]
-                : (activeTool == 'curve') ?
-                  [
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.crop_square
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          curve = 'rect';
-                        });
-                      }
-                    ),
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.circle_outlined
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          curve = 'oval';
-                        });
-                      }
-                    ),
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.pentagon_outlined
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          curve = 'polygone';
-                        });
-                      }
-                    )
-                  ]
-                : (activeTool == 'shape') ?
-                  [
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.rectangle
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          shape = 'rect';
-                        });
-                      }
-                    ),
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.circle
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          shape = 'oval';
-                        });
-                      }
-                    ),
-                    GestureDetector(
-                      child: Container(
-                        child: Icon(
-                          Icons.pentagon
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 15
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          shape = 'polygone';
-                        });
-                      }
-                    )
-                  ]
-                :
-                  [
-
-                  ]
-              )
+              :
+                Row()
             ),
             GestureDetector(
               onScaleUpdate: (event) {
@@ -1228,8 +1239,62 @@ class _MyHomePageState extends State<MyHomePage> {
                     ).toList();
                   },
                   onSelected: (item) async {
-                   if (false) {
-
+                   if (item == 'Сохранить') {
+                      softtrackCanvas.getCapture('png');
+                   } else if (item == 'Сохранить как') {
+                     showDialog(
+                       context: context,
+                       builder: (BuildContext context) => AlertDialog(
+                         title: Text(
+                           'Пункт назначения'
+                         ),
+                         content: Container(
+                           height: 100,
+                           child: Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               TextButton(
+                                 child: Text(
+                                   'Сохранять локально'
+                                 ),
+                                 style: ButtonStyle(
+                                   foregroundColor: MaterialStateProperty.all<Color>(
+                                     Colors.black
+                                   )
+                                 ),
+                                 onPressed: () {
+                                   softtrackCanvas.getCapture('png');
+                                   return Navigator.pop(context, 'OK');
+                                 },
+                               ),
+                               TextButton(
+                                 child: Text(
+                                   'Сохранять онлайн'
+                                 ),
+                                 style: ButtonStyle(
+                                   foregroundColor: MaterialStateProperty.all<Color>(
+                                     Colors.black
+                                   )
+                                 ),
+                                 onPressed: () {
+                                   Navigator.pushNamed(context, '/welcome');
+                                 }
+                               )
+                             ]
+                           )
+                         ),
+                         actions: [
+                           TextButton(
+                             child: Text(
+                               'Отмена'
+                             ),
+                             onPressed: () {
+                               return Navigator.pop(context, 'Cancel');
+                             }
+                           )
+                         ],
+                       )
+                     );
                    } else if (item == 'Экспорт PNG / JPG файлы') {
                      showDialog(
                        context: context,
@@ -1426,11 +1491,27 @@ class _MyHomePageState extends State<MyHomePage> {
                       horizontal: 10
                     ),
                     child: Icon(
-                      Icons.brush
+                      (
+                        activeTool == 'pen' ?
+                          Icons.brush
+                        : activeTool == 'eraser' ?
+                          Icons.crop_square
+                        : activeTool == 'curve' ?
+                          Icons.crop_square
+                        : activeTool == 'shape' ?
+                          Icons.rectangle
+                        : activeTool == 'fill' ?
+                          Icons.format_color_fill
+                        : activeTool == 'gradient' ?
+                          Icons.gradient
+                        : Icons.text_fields
+                      )
                     )
                   ),
                   onTap:() {
-
+                    setState(() {
+                      isToolBarVisible = !isToolBarVisible;
+                    });
                   },
                 ),
                 GestureDetector(
@@ -1644,7 +1725,68 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       onWillPop: () {
         return Future<bool>(() {
-          Navigator.pushNamed(context, '/welcome');
+          if (isToolBarVisible) {
+            setState(() {
+              isToolBarVisible = false;
+            });
+          } else {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: Text(
+                  'Вы закончили?'
+                ),
+                content: Container(
+                  height: 150,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextButton(
+                        child: Text(
+                          'Сохранить'
+                        ),
+                        style: ButtonStyle(
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            Colors.black
+                          )
+                        ),
+                        onPressed: () {
+                          softtrackCanvas.getCapture('png');
+                          return Navigator.pop(context, 'OK');
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          'Закрыть без сохранения'
+                        ),
+                        style: ButtonStyle(
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            Colors.black
+                          )
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/welcome');
+                        }
+                      ),
+                      TextButton(
+                        child: Text(
+                          'Отмена'
+                        ),
+                        style: ButtonStyle(
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            Colors.black
+                          )
+                        ),
+                        onPressed: () {
+                          return Navigator.pop(context, 'Cancel');
+                        }
+                      )
+                    ]
+                  )
+                )
+              )
+            );
+          }
           return false;
         });
       }
@@ -1656,7 +1798,7 @@ typedef MultiTouchGestureRecognizerCallback = void Function(bool correctNumberOf
 
 class MultiTouchGestureRecognizer extends MultiTapGestureRecognizer {
 
-  MultiTouchGestureRecognizerCallback onMultiTap = (pointer) => {
+  MultiTouchGestureRecognizerCallback onMultiTap = (pointer) {
     print("Tapped with correctNumberOfTouches finger(s)");
   };
   var numberOfTouches = 0;
