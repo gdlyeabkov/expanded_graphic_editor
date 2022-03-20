@@ -112,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'x': 1.0,
     'y': 1.0
   };
+  bool isCanvasFlip = false;
   double canvasWidth = 1007;
   double canvasHeight = 1414;
   int canvasDpi = 350;
@@ -125,6 +126,40 @@ class _MyHomePageState extends State<MyHomePage> {
       'x2': 0.0,
       'y2': 0.0,
       'selected': false,
+    }
+  ];
+  List<Map<String, double>> anchors = [
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
     }
   ];
   late SofttrackCanvas softtrackCanvas;
@@ -241,6 +276,26 @@ class _MyHomePageState extends State<MyHomePage> {
           'y2': touchY,
           'selected': false
         };
+      } else if (activeTool == 'ffd') {
+        int activeAnchor = 0;
+        if (touchX <= 50 && touchY <= 50) {
+          activeAnchor = 0;
+        } else if (touchX <= canvasWidth / 2 + 50 && touchX >= canvasWidth /2 - 50 && touchY <= 50) {
+          activeAnchor = 1;
+        } else if (touchX >= canvasWidth - 50 && touchY <= 50) {
+          activeAnchor = 2;
+        } else if (touchX <= 50 && touchY >= canvasHeight / 2 - 50 && touchY <= canvasHeight / 2 + 50) {
+          activeAnchor = 3;
+        } else if (touchX >= canvasWidth - 50 && touchY >= canvasHeight / 2 - 50 && touchY <= canvasHeight / 2 + 50) {
+          activeAnchor = 4;
+        } else if (touchX <= 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 5;
+        } else if (touchX <= canvasWidth / 2 + 50 && touchX >= canvasWidth /2 - 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 6;
+        } else if (touchX >= canvasWidth - 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 7;
+        }
+        print('activeAnchor: ${activeAnchor}');
       }
     });
   }
@@ -275,6 +330,30 @@ class _MyHomePageState extends State<MyHomePage> {
       } else if (activeTool == 'selection') {
         selections[0]['x2'] = touchX;
         selections[0]['y2'] = touchY;
+      } else if (activeTool == 'ffd') {
+        int activeAnchor = 0;
+        if (touchX <= 50 && touchY <= 50) {
+          activeAnchor = 0;
+        } else if (touchX <= canvasWidth / 2 + 50 && touchX >= canvasWidth /2 - 50 && touchY <= 50) {
+          activeAnchor = 1;
+        } else if (touchX >= canvasWidth - 50 && touchY <= 50) {
+          activeAnchor = 2;
+        } else if (touchX <= 50 && touchY >= canvasHeight / 2 - 50 && touchY <= canvasHeight / 2 + 50) {
+          activeAnchor = 3;
+        } else if (touchX >= canvasWidth - 50 && touchY >= canvasHeight / 2 - 50 && touchY <= canvasHeight / 2 + 50) {
+          activeAnchor = 4;
+        } else if (touchX <= 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 5;
+        } else if (touchX <= canvasWidth / 2 + 50 && touchX >= canvasWidth /2 - 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 6;
+        } else if (touchX >= canvasWidth - 50 && touchY >= canvasHeight - 50) {
+          activeAnchor = 7;
+        }
+        print('activeAnchor: ${activeAnchor}');
+        anchors[activeAnchor] = {
+          'x': touchX,
+          'y': touchY
+        };
       }
     });
   }
@@ -755,6 +834,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       )
     );
+    // здесь
   }
 
   @override
@@ -774,7 +854,7 @@ class _MyHomePageState extends State<MyHomePage> {
         canvasPaperSize = arguments['paperSize'];
         canvasBackgroundColor = arguments['backgroundColor'];
       }
-      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections);
+      softtrackCanvas = SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, isCanvasFlip, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections, activeTool, anchors);
     });
 
     return WillPopScope(
@@ -1162,6 +1242,65 @@ class _MyHomePageState extends State<MyHomePage> {
                               )
                             ]
                           )
+                        : activeTool == 'ffd' ?
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    activeTool = 'pen';
+                                    anchors = [
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      },
+                                      {
+                                        'x': 0.0,
+                                        'y': 0.0
+                                      }
+                                    ];
+                                  });
+                                },
+                                child: Text(
+                                  'Отменить деформацию'
+                                ),
+                                style: ButtonStyle(
+                                  foregroundColor: MaterialStateProperty.all<Color>(
+                                    Color.fromARGB(255, 255, 255, 255)
+                                  ),
+                                  backgroundColor: MaterialStateProperty.all<Color>(
+                                    Color.fromARGB(255, 150, 150, 150)
+                                  ),
+                                )
+                              )
+                            ]
+                          )
                         :
                           Row()
                       ),
@@ -1439,6 +1578,44 @@ class _MyHomePageState extends State<MyHomePage> {
                         activeTool = 'selection';
                         isSelectionMode = true;
                       });
+                    } else if (item == 'Свободная трансформация') {
+                      setState(() {
+                        activeTool = 'ffd';
+                        anchors = [
+                          {
+                            'x': 0.0,
+                            'y': 0.0
+                          },
+                          {
+                            'x': canvasWidth / 2,
+                            'y': 0.0
+                          },
+                          {
+                            'x': canvasWidth,
+                            'y': 0.0
+                          },
+                          {
+                            'x': 0.0,
+                            'y': canvasHeight / 2
+                          },
+                          {
+                            'x': canvasWidth,
+                            'y': canvasHeight / 2
+                          },
+                          {
+                            'x': 0.0,
+                            'y': canvasHeight
+                          },
+                          {
+                            'x': canvasWidth / 2,
+                            'y': canvasHeight
+                          },
+                          {
+                            'x': canvasWidth,
+                            'y': canvasHeight
+                          }
+                        ];
+                      });
                     } else if (item == 'Преобразование') {
                       // canvasMatrix =
                     }
@@ -1472,7 +1649,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     } else if (item == 'Отразить по горизонтали') {
                       setState(() {
-                        canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
+                        // canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
+                        isCanvasFlip = !isCanvasFlip;
                       });
                     } else if (item == 'Сброс') {
                       setState(() {

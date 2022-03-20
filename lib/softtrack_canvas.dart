@@ -1,4 +1,6 @@
 // import 'dart:html';
+import 'dart:collection';
+import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -11,6 +13,7 @@ import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:matrix4_transform/matrix4_transform.dart';
 
 class SofttrackCanvas extends CustomPainter {
 
@@ -23,6 +26,7 @@ class SofttrackCanvas extends CustomPainter {
     'x': 1.0,
     'y': 1.0
   };
+  bool isCanvasFlip = false;
   Color canvasBackgroundColor = Colors.white;
   double canvasWidth = 1007.0;
   double canvasHeight = 1414.0;
@@ -36,19 +40,57 @@ class SofttrackCanvas extends CustomPainter {
       'selected': false,
     }
   ];
+  String activeTool = 'pen';
+  List<Map<String, double>> anchors = [
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    },
+    {
+      'x': 0.0,
+      'y': 0.0
+    }
+  ];
 
-  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections) {
+  SofttrackCanvas(context, touchX, touchY, shapes, canvasRotation, canvasScale, isCanvasFlip, canvasBackgroundColor, canvasWidth, canvasHeight, isSelectionMode, selections, activeTool, List<Map<String, double>> anchors) {
     this.context = context;
     this.touchX = touchX;
     this.touchY = touchY;
     this.shapes = shapes;
     this.canvasRotation = canvasRotation;
     this.canvasScale = canvasScale;
+    this.isCanvasFlip = isCanvasFlip;
     this.canvasBackgroundColor = canvasBackgroundColor;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.isSelectionMode = isSelectionMode;
     this.selections = selections;
+    this.activeTool = activeTool;
+    this.anchors = anchors;
   }
 
   Future<String> get _localPath async {
@@ -91,25 +133,6 @@ class SofttrackCanvas extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    Float64List matrix4 = Float64List(16);
-    // matrix4.add(0.0);
-    // matrix4.add(0.2);
-    // matrix4.add(0.4);
-    // matrix4.add(0.6);
-    // matrix4.add(0.8);
-    // matrix4.add(0.8);
-    // matrix4.add(1.0);
-    // matrix4.add(1.2);
-    // matrix4.add(1.4);
-    // matrix4.add(1.6);
-    // matrix4.add(1.8);
-    // matrix4.add(2.0);
-    // matrix4.add(2.2);
-    // matrix4.add(2.4);
-    // matrix4.add(2.6);
-    // matrix4.add(2.8);
-    // canvas.transform(matrix4);
-
     if (isSelectionMode) {
       double x1 = selections[0]['x1'];
       double y1 = selections[0]['y1'];
@@ -121,7 +144,6 @@ class SofttrackCanvas extends CustomPainter {
         canvas.clipRect(Rect.fromPoints(Offset(x1, y1), Offset(x2, y2)));
       }
       canvas.drawRect(Rect.fromPoints(Offset(x1, y1), Offset(x2, y2)), Paint()..style = PaintingStyle.fill..color = Colors.white);
-
     }
 
     final double r = sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight) / 2;
@@ -137,6 +159,11 @@ class SofttrackCanvas extends CustomPainter {
     double canvasScaleX = canvasScale['x'] as double;
     double canvasScaleY = canvasScale['y'] as double;
     canvas.scale(canvasScaleX, canvasScaleY);
+
+    if (isCanvasFlip) {
+      Matrix4Transform matrix = Matrix4Transform().flipHorizontally(origin: Offset(canvasWidth / 2, canvasHeight / 2));
+      canvas.transform(matrix.matrix4.storage);
+    }
 
     print('size.width: ${size.width}');
     canvas.drawColor(canvasBackgroundColor, BlendMode.colorBurn);
@@ -354,6 +381,85 @@ class SofttrackCanvas extends CustomPainter {
         textPainter.paint(canvas, Offset(x, y));
       }
     }
+
+    Float64List matrix4 = Float64List(16);
+    // matrix4.add(0.0);
+    // matrix4.add(0.2);
+    // matrix4.add(0.4);
+    // matrix4.add(0.6);
+    // matrix4.add(0.8);
+    // matrix4.add(0.8);
+    // matrix4.add(1.0);
+    // matrix4.add(1.2);
+    // matrix4.add(1.4);
+    // matrix4.add(1.6);
+    // matrix4.add(1.8);
+    // matrix4.add(2.0);
+    // matrix4.add(2.2);
+    // matrix4.add(2.4);
+    // matrix4.add(2.6);
+    // matrix4.add(2.8);
+    // canvas.transform(matrix4);
+
+    // final rot2 = RotationMatrix(93.45, 128.85, 0.0, -1, 1, 0.0, math.pi);
+    // final mtx2 = rot2.getMatrix();
+    // canvas.transform(mtx2);
+
+    // canvas.transform(Matrix4(
+    //   1,0,0,0,
+    //   0,1,0,0,
+    //   0,0,1,0,
+    //   0,0,0,1,
+    // ));
+
+    // Matrix4Transform matrix = Matrix4Transform().rotateDegrees(180, origin: Offset(canvasWidth / 2, canvasHeight / 2));
+    // canvas.transform(matrix.matrix4.storage);
+
+    // Matrix4Transform matrix = Matrix4Transform().upLeft(0).translate(x: 0, y: 0);
+    Matrix4Transform matrix = Matrix4Transform();
+
+    // matrix.upLeft(0).translate(x: 0, y: 0);
+    // matrix.up(0).translate(x: 0, y: 0);
+    // matrix.upRight(0).translate(x: 0, y: 0);
+    // matrix.left(0).translate(x: 0, y: 0);
+    // matrix.right(0).translate(x: 0, y: 0);
+    // matrix.downLeft(0).translate(x: 0, y: 0);
+    // matrix.down(0).translate(x: 0, y: 0);
+    // matrix.downRight(0).translate(x: 0, y: 0);
+
+    if (activeTool == 'ffd') {
+      // touchableCanvas = Touch
+      // canvas.drawCircle(Offset(0, 0), 5, Paint());
+      // canvas.drawCircle(Offset(canvasWidth / 2, 0), 5, Paint());
+      // canvas.drawCircle(Offset(canvasWidth, 0), 5, Paint());
+      // canvas.drawCircle(Offset(0, canvasHeight / 2), 5, Paint());
+      // canvas.drawCircle(Offset(canvasWidth, canvasHeight / 2), 5, Paint());
+      // canvas.drawCircle(Offset(0, canvasHeight), 5, Paint());
+      // canvas.drawCircle(Offset(canvasWidth / 2, canvasHeight), 5, Paint());
+      // canvas.drawCircle(Offset(canvasWidth, canvasHeight), 5, Paint());
+
+      canvas.drawCircle(Offset((anchors[0]['x'] as double).roundToDouble(), (anchors[0]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[1]['x'] as double).roundToDouble(), (anchors[1]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[2]['x'] as double).roundToDouble(), (anchors[2]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[3]['x'] as double).roundToDouble(), (anchors[3]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[4]['x'] as double).roundToDouble(), (anchors[4]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[5]['x'] as double).roundToDouble(), (anchors[5]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[6]['x'] as double).roundToDouble(), (anchors[6]['y'] as double).roundToDouble()), 5, Paint());
+      canvas.drawCircle(Offset((anchors[7]['x'] as double).roundToDouble(), (anchors[7]['y'] as double).roundToDouble()), 5, Paint());
+
+      matrix.upLeft(0).translate(x: (anchors[0]['x'] as double).roundToDouble(), y: (anchors[0]['y'] as double).roundToDouble());
+      matrix.up(0).translate(x: (anchors[1]['x'] as double).roundToDouble(), y: (anchors[1]['y'] as double).roundToDouble());
+      matrix.upRight(0).translate(x: (anchors[2]['x'] as double).roundToDouble(), y: (anchors[2]['y'] as double).roundToDouble());
+      matrix.left(0).translate(x: (anchors[3]['x'] as double).roundToDouble(), y: (anchors[3]['y'] as double).roundToDouble());
+      matrix.right(0).translate(x: (anchors[4]['x'] as double).roundToDouble(), y: (anchors[4]['y'] as double).roundToDouble());
+      matrix.downLeft(0).translate(x: (anchors[5]['x'] as double).roundToDouble(), y: (anchors[5]['y'] as double).roundToDouble());
+      matrix.down(0).translate(x: (anchors[6]['x'] as double).roundToDouble(), y: (anchors[6]['y'] as double).roundToDouble());
+      matrix.downRight(0).translate(x: (anchors[7]['x'] as double).roundToDouble(), y: (anchors[7]['y'] as double).roundToDouble());
+
+      canvas.transform(matrix.matrix4.storage);
+
+    }
+
   }
 
   @override
