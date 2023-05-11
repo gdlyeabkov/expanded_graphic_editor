@@ -1,4 +1,3 @@
-// import 'dart:html';
 import 'dart:collection';
 import 'dart:ffi';
 import 'dart:math';
@@ -8,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-// import 'package:ext_storage/ext_storage.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
@@ -108,12 +106,10 @@ class SofttrackCanvas extends CustomPainter {
     ui.Image image = await picture.toImage(415, 550);
     ByteData data = await image.toByteData(format: ui.ImageByteFormat.png) as ByteData;
     Uint8List decodedImage = data.buffer.asUint8List();
-    // String fileName = 'expanded_graphic_editor_render.${format}';
     DateTime currentDateTime = DateTime.now();
     String fileName = '${currentDateTime.millisecondsSinceEpoch}.${format}';
     Directory? downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
     String downloadsDirectoryPath = downloadsDirectory!.path;
-    // String path = '${downloadsDirectoryPath}/${fileName}';
     String appDir = await _localPath;
     String path = '${appDir}/${fileName}';
     final file = File(path);
@@ -165,7 +161,6 @@ class SofttrackCanvas extends CustomPainter {
       canvas.transform(matrix.matrix4.storage);
     }
 
-    print('size.width: ${size.width}');
     canvas.drawColor(canvasBackgroundColor, BlendMode.colorBurn);
     for (var shape in shapes) {
       String type = shape['type'];
@@ -193,13 +188,7 @@ class SofttrackCanvas extends CustomPainter {
         String curveType = shape['curveType'];
         if (curveType == 'polygone') {
           Path path = Path();
-          // List<Offset> points = [
-          //   Offset(100, 500),
-          //   Offset(200, 600),
-          //   Offset(300, 400),
-          // ];
           List<Offset> points = shape['points'];
-          print('points: ${points.length}');
           path.addPolygon(points, true);
           canvas.drawPath(path, curvePaint);
         } else {
@@ -250,7 +239,6 @@ class SofttrackCanvas extends CustomPainter {
         Color color = shape['color'];
         Color outlineColor = shape['outlineColor'];
         double outlineWidth = shape['outlineWidth'];
-        print('text: ${content}');
         Paint foregroundPaint = Paint();
         foregroundPaint.style = PaintingStyle.fill;
         foregroundPaint.color = color;
@@ -383,61 +371,9 @@ class SofttrackCanvas extends CustomPainter {
     }
 
     Float64List matrix4 = Float64List(16);
-    // matrix4.add(0.0);
-    // matrix4.add(0.2);
-    // matrix4.add(0.4);
-    // matrix4.add(0.6);
-    // matrix4.add(0.8);
-    // matrix4.add(0.8);
-    // matrix4.add(1.0);
-    // matrix4.add(1.2);
-    // matrix4.add(1.4);
-    // matrix4.add(1.6);
-    // matrix4.add(1.8);
-    // matrix4.add(2.0);
-    // matrix4.add(2.2);
-    // matrix4.add(2.4);
-    // matrix4.add(2.6);
-    // matrix4.add(2.8);
-    // canvas.transform(matrix4);
-
-    // final rot2 = RotationMatrix(93.45, 128.85, 0.0, -1, 1, 0.0, math.pi);
-    // final mtx2 = rot2.getMatrix();
-    // canvas.transform(mtx2);
-
-    // canvas.transform(Matrix4(
-    //   1,0,0,0,
-    //   0,1,0,0,
-    //   0,0,1,0,
-    //   0,0,0,1,
-    // ));
-
-    // Matrix4Transform matrix = Matrix4Transform().rotateDegrees(180, origin: Offset(canvasWidth / 2, canvasHeight / 2));
-    // canvas.transform(matrix.matrix4.storage);
-
-    // Matrix4Transform matrix = Matrix4Transform().upLeft(0).translate(x: 0, y: 0);
     Matrix4Transform matrix = Matrix4Transform();
 
-    // matrix.upLeft(0).translate(x: 0, y: 0);
-    // matrix.up(0).translate(x: 0, y: 0);
-    // matrix.upRight(0).translate(x: 0, y: 0);
-    // matrix.left(0).translate(x: 0, y: 0);
-    // matrix.right(0).translate(x: 0, y: 0);
-    // matrix.downLeft(0).translate(x: 0, y: 0);
-    // matrix.down(0).translate(x: 0, y: 0);
-    // matrix.downRight(0).translate(x: 0, y: 0);
-
     if (activeTool == 'ffd') {
-      // touchableCanvas = Touch
-      // canvas.drawCircle(Offset(0, 0), 5, Paint());
-      // canvas.drawCircle(Offset(canvasWidth / 2, 0), 5, Paint());
-      // canvas.drawCircle(Offset(canvasWidth, 0), 5, Paint());
-      // canvas.drawCircle(Offset(0, canvasHeight / 2), 5, Paint());
-      // canvas.drawCircle(Offset(canvasWidth, canvasHeight / 2), 5, Paint());
-      // canvas.drawCircle(Offset(0, canvasHeight), 5, Paint());
-      // canvas.drawCircle(Offset(canvasWidth / 2, canvasHeight), 5, Paint());
-      // canvas.drawCircle(Offset(canvasWidth, canvasHeight), 5, Paint());
-
       canvas.drawCircle(Offset((anchors[0]['x'] as double).roundToDouble(), (anchors[0]['y'] as double).roundToDouble()), 5, Paint());
       canvas.drawCircle(Offset((anchors[1]['x'] as double).roundToDouble(), (anchors[1]['y'] as double).roundToDouble()), 5, Paint());
       canvas.drawCircle(Offset((anchors[2]['x'] as double).roundToDouble(), (anchors[2]['y'] as double).roundToDouble()), 5, Paint());

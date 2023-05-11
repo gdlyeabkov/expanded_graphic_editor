@@ -54,7 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
   double touchY = 0;
   List shapes = [];
   List<Offset> points = [];
-  // int pointsCursor = -1;
   String curve = 'rect';
   String shape = 'rect';
   Color paleteColor = Colors.black;
@@ -187,7 +186,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   addLayer(int layerIndexS) {
       int layerIndex = layers.length;
-      // setState(() {
       layers.add(
         GestureDetector(
           child: Container(
@@ -229,7 +227,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         )
       );
-    // });
   }
 
   onTouchStart(event, context) {
@@ -834,7 +831,6 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       )
     );
-    // здесь
   }
 
   @override
@@ -1195,13 +1191,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   )
                 },
-                // onPanUpdate: (event) {
-                //   print('onPanUpdate: ${event.localPosition.direction}');
-                //   setState(() {
-                //     canvasRotation += event.localPosition.direction;
-                //   });
-                // },
-                // поворот работает коряво
                 child: GestureDetector(
                   child: Container(
                     child: CustomPaint(
@@ -1616,8 +1605,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                         ];
                       });
-                    } else if (item == 'Преобразование') {
-                      // canvasMatrix =
                     }
                   },
                 ),
@@ -1649,7 +1636,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     } else if (item == 'Отразить по горизонтали') {
                       setState(() {
-                        // canvasScale['x'] = (canvasScale['x'] as double) * -1.0;
                         isCanvasFlip = !isCanvasFlip;
                       });
                     } else if (item == 'Сброс') {
@@ -1773,7 +1759,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       layers = [];
                       for (int snapshotIndex = 0; snapshotIndex < snapshotsCount; snapshotIndex++) {
                         int layerIndex = snapshotIndex;
-                        // setState(() {
                           layers.add(
                               GestureDetector(
                                   child: Container(
@@ -1815,7 +1800,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                   }
                               )
                           );
-                        // });
                       }
                     }
                     if (snapshot.hasData) {
@@ -1994,13 +1978,6 @@ class MultiTouchGestureRecognizer extends MultiTapGestureRecognizer {
   }
 
   void removeTouch(int pointer, TapUpDetails details) {
-    if (this.numberOfTouches == this.minNumberOfTouches) {
-      // this.onMultiTap(true);
-    }
-    else if (this.numberOfTouches != 0) {
-      // this.onMultiTap(false);
-    }
-
     this.numberOfTouches = 0;
   }
 
