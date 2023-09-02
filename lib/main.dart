@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:graphiceditor/canvas_create.dart';
 import 'package:graphiceditor/softtrack_canvas.dart';
 import 'package:graphiceditor/start.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:touchable/touchable.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'gallery.dart';
 import 'models.dart';
@@ -431,15 +428,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Fluttertoast.showToast(
-                                msg: 'В настоящее время фукнция\nголосового набора\nне используется',
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                                timeInSecForIosWeb: 1,
-                                backgroundColor: Colors.black,
-                                textColor: Colors.white,
-                                fontSize: 16.0
-                              );
                             },
                             child: Icon(
                               Icons.mic
@@ -1516,13 +1504,6 @@ class _MyHomePageState extends State<MyHomePage> {
                          )
                        )
                      );
-                   } else if (item == 'Справка') {
-                     final String url = 'https://medibangpaint.com/ru/android/use/';
-                     await launch(url);
-                   } else if (item == 'Калибровка гидролокатора пера') {
-                     final String url = 'market://details?id=com.greenbulb.calibrate';
-                     if (await canLaunch(url))
-                      await launch(url);
                    }
                   }
                 ),

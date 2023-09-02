@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 
 class GalleryPage extends StatefulWidget {
@@ -20,8 +19,7 @@ class _GalleryPageState extends State<GalleryPage> {
   List<Widget> files = [];
 
   Future<String> get _localPath async {
-    final directory = await getTemporaryDirectory();
-    return directory.path;
+    return "";
   }
 
   Future<List<FileSystemEntity>> getFiles() async {

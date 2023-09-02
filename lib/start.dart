@@ -25,7 +25,7 @@ class _StartPageState extends State<StartPage> {
           'Softtrack Графический редактор'
         ),
         actions: [
-          FlatButton(
+          TextButton(
             child: Icon(
               Icons.notifications
             ),
@@ -33,7 +33,7 @@ class _StartPageState extends State<StartPage> {
 
             }
           ),
-          FlatButton(
+          TextButton(
             child: Icon(
               Icons.account_circle
             ),

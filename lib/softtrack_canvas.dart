@@ -7,10 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:matrix4_transform/matrix4_transform.dart';
 
 class SofttrackCanvas extends CustomPainter {
@@ -92,8 +88,7 @@ class SofttrackCanvas extends CustomPainter {
   }
 
   Future<String> get _localPath async {
-    final directory = await getTemporaryDirectory();
-    return directory.path;
+    return "";
   }
 
   getCapture(String format) async {
@@ -101,33 +96,22 @@ class SofttrackCanvas extends CustomPainter {
     var origin = new Offset(0.0, 0.0);
     var paintBounds = new Rect.fromPoints(origin, Offset(415, 550));
     var canvas = new Canvas(recorder, paintBounds);
-    paint(canvas, Size(415, 550));
+    paint(canvas, ui.Size(415, 550));
     var picture = recorder.endRecording();
     ui.Image image = await picture.toImage(415, 550);
     ByteData data = await image.toByteData(format: ui.ImageByteFormat.png) as ByteData;
     Uint8List decodedImage = data.buffer.asUint8List();
     DateTime currentDateTime = DateTime.now();
     String fileName = '${currentDateTime.millisecondsSinceEpoch}.${format}';
-    Directory? downloadsDirectory = await DownloadsPathProvider.downloadsDirectory;
-    String downloadsDirectoryPath = downloadsDirectory!.path;
     String appDir = await _localPath;
     String path = '${appDir}/${fileName}';
     final file = File(path);
     await file.writeAsBytes(decodedImage);
-    Fluttertoast.showToast(
-      msg: 'Сохранение выполнено',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-      fontSize: 16.0
-    );
     return decodedImage;
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, ui.Size size) {
 
     if (isSelectionMode) {
       double x1 = selections[0]['x1'];
